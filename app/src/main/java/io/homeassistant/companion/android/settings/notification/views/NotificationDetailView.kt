@@ -40,7 +40,7 @@ fun LoadNotification(notification: NotificationItem) {
 
         NotificationDetailViewHeader(stringId = commonR.string.notification_source)
         Text(
-            text = notification.source,
+            text = notification.source ?: "",
             modifier = valueModifier
         )
 
