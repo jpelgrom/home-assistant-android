@@ -12,7 +12,7 @@ data class NotificationItem(
     @ColumnInfo(name = "received")
     val received: Long,
     @ColumnInfo(name = "message")
-    val message: String?,
+    val message: String?, // very important
     @ColumnInfo(name = "data")
     val data: String,
     @ColumnInfo(name = "source")
