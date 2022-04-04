@@ -192,6 +192,8 @@ class WebViewActivity : BaseActivity(), io.homeassistant.companion.android.webvi
     private var failedConnection = "external"
     private var moreInfoEntity = ""
     private val moreInfoMutex = Mutex()
+    private var themeSet = false
+    private val themeMutex = Mutex()
     private var currentAutoplay: Boolean = false
     private var downloadFileUrl = ""
     private var downloadFileContentDisposition = ""
@@ -278,17 +280,28 @@ class WebViewActivity : BaseActivity(), io.homeassistant.companion.android.webvi
 
                 override fun onPageFinished(view: WebView?, url: String?) {
                     enablePinchToZoom()
-                    if (moreInfoEntity != "" && view?.progress == 100 && isConnected) {
-                        ioScope.launch {
-                            val owner = "onPageFinished:$moreInfoEntity"
-                            if (moreInfoMutex.tryLock(owner)) {
-                                delay(2000L)
-                                Log.d(TAG, "More info entity: $moreInfoEntity")
-                                webView.evaluateJavascript(
-                                    "document.querySelector(\"home-assistant\").dispatchEvent(new CustomEvent(\"hass-more-info\", { detail: { entityId: \"$moreInfoEntity\" }}))"
-                                ) {
-                                    moreInfoMutex.unlock(owner)
-                                    moreInfoEntity = ""
+                    if (view?.progress == 100 && isConnected) {
+                        if (moreInfoEntity != "") {
+                            ioScope.launch {
+                                val owner = "onPageFinished:$moreInfoEntity"
+                                if (moreInfoMutex.tryLock(owner)) {
+                                    delay(2000L)
+                                    Log.d(TAG, "More info entity: $moreInfoEntity")
+                                    webView.evaluateJavascript(
+                                        "document.querySelector(\"home-assistant\").dispatchEvent(new CustomEvent(\"hass-more-info\", { detail: { entityId: \"$moreInfoEntity\" }}))"
+                                    ) {
+                                        moreInfoMutex.unlock(owner)
+                                        moreInfoEntity = ""
+                                    }
+                                }
+                            }
+                        }
+                        if (!themeSet) {
+                            ioScope.launch {
+                                if (themeMutex.tryLock()) {
+                                    delay(2000L)
+                                    if (!themeSet) setMaterialYouThemeOverride()
+                                    themeMutex.unlock()
                                 }
                             }
                         }
@@ -628,6 +641,10 @@ class WebViewActivity : BaseActivity(), io.homeassistant.companion.android.webvi
     }
 
     private fun getAndSetStatusBarNavigationBarColors() {
+        if (presenter.isMaterialYouOverrideEnabled() && !themeSet) {
+            setMaterialYouThemeOverride()
+        }
+
         val htmlArraySpacer = "-SPACER-"
         webView.evaluateJavascript(
             "[" +
@@ -658,6 +675,33 @@ class WebViewActivity : BaseActivity(), io.homeassistant.companion.android.webvi
         }
     }
 
+    private fun setMaterialYouThemeOverride() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && presenter.isMaterialYouOverrideEnabled()) {
+            val materialYouPrimary = String.format("#%06x", ContextCompat.getColor(this, commonR.color.colorMaterialYouPrimary) and 0xffffff)
+            val materialYouSecondary = String.format("#%06x", ContextCompat.getColor(this, commonR.color.colorMaterialYouSecondary) and 0xffffff)
+            Log.d(TAG, "Checking for default theme, and updating to Material You $materialYouPrimary, $materialYouSecondary")
+
+            // https://github.com/home-assistant/frontend/blob/dev/src/panels/profile/ha-pick-theme-row.ts
+            webView.evaluateJavascript(
+                """
+                    var hass = document.querySelector("home-assistant").hass;
+                    var curTheme = hass.selectedTheme?.theme
+                        ? hass.selectedTheme?.theme
+                        : hass.themes.darkMode
+                        ? hass.themes.default_dark_theme || hass.themes.default_theme
+                        : hass.themes.default_theme;
+                    if (curTheme === "default") {
+                        document.querySelector("home-assistant").dispatchEvent(
+                            new CustomEvent("settheme", { detail: { primaryColor: "$materialYouPrimary", accentColor: "$materialYouSecondary" }})
+                        );
+                    }
+                """
+            ) {}
+
+            themeSet = true
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         if ((currentLang != languagesManager.getCurrentLang()) || currentAutoplay != presenter.isAutoPlayVideoEnabled())
@@ -670,6 +714,7 @@ class WebViewActivity : BaseActivity(), io.homeassistant.companion.android.webvi
         }
 
         enablePinchToZoom()
+        setMaterialYouThemeOverride()
 
         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG || presenter.isWebViewDebugEnabled())
 

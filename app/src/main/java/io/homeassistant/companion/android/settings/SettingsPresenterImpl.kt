@@ -53,6 +53,7 @@ class SettingsPresenterImpl @Inject constructor(
                 "prioritize_internal" -> urlUseCase.isPrioritizeInternal()
                 "autoplay_video" -> integrationUseCase.isAutoPlayVideoEnabled()
                 "webview_debug" -> integrationUseCase.isWebViewDebugEnabled()
+                "material_you_override" -> integrationUseCase.isMaterialYouOverrideEnabled()
                 else -> throw IllegalArgumentException("No boolean found by this key: $key")
             }
         }
@@ -69,6 +70,7 @@ class SettingsPresenterImpl @Inject constructor(
                 "prioritize_internal" -> urlUseCase.setPrioritizeInternal(value)
                 "autoplay_video" -> integrationUseCase.setAutoPlayVideo(value)
                 "webview_debug" -> integrationUseCase.setWebViewDebugEnabled(value)
+                "material_you_override" -> integrationUseCase.setMaterialYouOverrideEnabled(value)
                 else -> throw IllegalArgumentException("No boolean found by this key: $key")
             }
         }

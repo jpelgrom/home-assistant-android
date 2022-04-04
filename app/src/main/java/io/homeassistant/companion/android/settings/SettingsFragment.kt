@@ -135,6 +135,8 @@ class SettingsFragment constructor(
 
         removeSystemFromThemesIfNeeded()
 
+        findPreference<SwitchPreference>("material_you_override")?.isVisible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+
         updateBackgroundAccessPref()
 
         findPreference<EditTextPreference>("connection_internal")?.let {

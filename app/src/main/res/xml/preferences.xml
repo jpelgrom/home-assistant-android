@@ -119,6 +119,11 @@
             android:icon="@drawable/ic_color_lens_24dp"
             android:title="@string/themes_title_settings"
             app:useSimpleSummaryProvider="true"/>
+        <SwitchPreference
+            android:key="material_you_override"
+            android:icon="@drawable/ic_color_lens_24dp"
+            android:title="@string/materialyou_title"
+            android:summary="@string/materialyou_summary" />
         <Preference
             android:key="background"
             android:title="@string/background_access_title"/>

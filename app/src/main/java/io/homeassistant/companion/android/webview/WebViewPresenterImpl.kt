@@ -150,6 +150,12 @@ class WebViewPresenterImpl @Inject constructor(
         }
     }
 
+    override fun isMaterialYouOverrideEnabled(): Boolean {
+        return runBlocking {
+            integrationUseCase.isMaterialYouOverrideEnabled()
+        }
+    }
+
     override fun isLockEnabled(): Boolean {
         return runBlocking {
             authenticationUseCase.isLockEnabled()

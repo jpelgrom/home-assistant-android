@@ -34,6 +34,9 @@ interface IntegrationRepository {
     suspend fun setWebViewDebugEnabled(enabled: Boolean)
     suspend fun isWebViewDebugEnabled(): Boolean
 
+    suspend fun setMaterialYouOverrideEnabled(enabled: Boolean)
+    suspend fun isMaterialYouOverrideEnabled(): Boolean
+
     suspend fun sessionTimeOut(value: Int)
     suspend fun getSessionTimeOut(): Int
 

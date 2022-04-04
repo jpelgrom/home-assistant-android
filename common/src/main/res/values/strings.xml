@@ -658,6 +658,8 @@
     <string name="themes_option_value_light">light</string>
     <string name="themes_option_value_system">system</string>
     <string name="themes_title_settings">Theme</string>
+    <string name="materialyou_summary">When using the default theme for Home Assistant, update the colors to match your device theme</string>
+    <string name="materialyou_title">Apply device theme</string>
     <string name="tile_1">Tile 1</string>
     <string name="tile_10">Tile 10</string>
     <string name="tile_11">Tile 11</string>
