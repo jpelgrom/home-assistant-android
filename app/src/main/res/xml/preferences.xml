@@ -95,11 +95,6 @@
             android:icon="@drawable/ic_baseline_video_settings_24"
             android:title="@string/autoplay_video"
             android:summary="@string/autoplay_video_summary" />
-        <SwitchPreference
-            android:key="webview_debug"
-            android:icon="@drawable/ic_android_debug_bridge"
-            android:title="@string/remote_debugging"
-            android:summary="@string/remote_debugging_summary" />
         <Preference
             android:key="nfc_tags"
             android:icon="@drawable/ic_nfc"
@@ -192,11 +187,24 @@
             <intent android:action="android.intent.action.VIEW"
                 android:data="https://companion.home-assistant.io" />
         </Preference>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/debugging">
         <Preference
             android:key="show_share_logs"
             android:icon="@drawable/ic_notes"
             android:title="@string/show_share_logs"
             android:summary="@string/show_share_logs_summary" />
+        <Preference
+            android:key="webview_clear_cache"
+            android:icon="@drawable/ic_android_debug_bridge"
+            android:title="@string/webview_clear_cache"
+            android:summary="@string/webview_clear_cache_summary" />
+        <SwitchPreference
+            android:key="webview_debug"
+            android:icon="@drawable/ic_android_debug_bridge"
+            android:title="@string/remote_debugging"
+            android:summary="@string/remote_debugging_summary" />
     </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/app_version_info">

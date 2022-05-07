@@ -46,6 +46,7 @@ import io.homeassistant.companion.android.settings.ssid.SsidPreference
 import io.homeassistant.companion.android.settings.wear.SettingsWearActivity
 import io.homeassistant.companion.android.settings.websocket.WebsocketSettingFragment
 import io.homeassistant.companion.android.settings.widgets.ManageWidgetsSettingsFragment
+import io.homeassistant.companion.android.webview.WebViewActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -316,6 +317,16 @@ class SettingsFragment constructor(
         findPreference<Preference>("privacy")?.let {
             it.summary = "https://www.home-assistant.io/privacy/"
             it.intent = Intent(Intent.ACTION_VIEW, Uri.parse(it.summary.toString()))
+        }
+
+        findPreference<Preference>("webview_clear_cache")?.setOnPreferenceClickListener {
+            val webviewIntent = WebViewActivity.newInstance(requireContext()).apply {
+                putExtra(WebViewActivity.EXTRA_CLEAR_CACHE, true)
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
+            startActivity(webviewIntent)
+            activity?.finish()
+            true
         }
 
         findPreference<Preference>("show_share_logs")?.setOnPreferenceClickListener {

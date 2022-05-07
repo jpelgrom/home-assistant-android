@@ -38,6 +38,7 @@ import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
+import android.webkit.WebStorage
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
@@ -106,6 +107,7 @@ class WebViewActivity : BaseActivity(), io.homeassistant.companion.android.webvi
 
     companion object {
         const val EXTRA_PATH = "path"
+        const val EXTRA_CLEAR_CACHE = "clear_cache"
 
         private const val TAG = "WebviewActivity"
         private const val APP_PREFIX = "app://"
@@ -660,6 +662,21 @@ class WebViewActivity : BaseActivity(), io.homeassistant.companion.android.webvi
 
     override fun onResume() {
         super.onResume()
+        if (intent.getBooleanExtra(EXTRA_CLEAR_CACHE, false)) {
+            try {
+                // Deleting all data is currently not fully implemented / does not clear service worker cache
+                // https://bugs.chromium.org/p/chromium/issues/detail?id=1242167
+                WebStorage.getInstance().deleteAllData()
+                webView.clearCache(true)
+                Toast.makeText(this, commonR.string.webview_clear_cache_success, Toast.LENGTH_SHORT).show()
+
+                intent = newInstance(this)
+                recreate()
+            } catch (e: Exception) {
+                Log.e(TAG, "Encountered issue clearing WebView cache", e)
+                Toast.makeText(this, commonR.string.webview_clear_cache_failure, Toast.LENGTH_SHORT).show()
+            }
+        }
         if ((currentLang != languagesManager.getCurrentLang()) || currentAutoplay != presenter.isAutoPlayVideoEnabled())
             recreate()
         if ((!unlocked && !presenter.isLockEnabled()) ||
@@ -687,6 +704,11 @@ class WebViewActivity : BaseActivity(), io.homeassistant.companion.android.webvi
     override fun onPause() {
         super.onPause()
         SensorWorker.start(this)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
     }
 
     private fun checkAndWarnForDisabledLocation() {
