@@ -22,6 +22,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.homeassistant.companion.android.BuildConfig
 import io.homeassistant.companion.android.R
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
+import io.homeassistant.companion.android.common.data.integration.MediaPlayerAttributes
 import io.homeassistant.companion.android.common.data.url.UrlRepository
 import io.homeassistant.companion.android.database.widget.MediaPlayerControlsWidgetDao
 import io.homeassistant.companion.android.database.widget.MediaPlayerControlsWidgetEntity
@@ -106,7 +108,7 @@ class MediaPlayerControlsWidget : BaseWidgetProvider() {
         }
     }
 
-    override suspend fun getWidgetRemoteViews(context: Context, appWidgetId: Int, suggestedEntity: Entity<Map<String, Any>>?): RemoteViews {
+    override suspend fun getWidgetRemoteViews(context: Context, appWidgetId: Int, suggestedEntity: Entity<EntityAttributes>?): RemoteViews {
         val updateMediaIntent = Intent(context, MediaPlayerControlsWidget::class.java).apply {
             action = UPDATE_MEDIA_IMAGE
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
@@ -160,6 +162,7 @@ class MediaPlayerControlsWidget : BaseWidgetProvider() {
                 val showSeek: Boolean = widget.showSeek
                 val showSource: Boolean = widget.showSource
                 val entity = getEntity(context, entityIds, suggestedEntity)
+                val attributes = entity?.attributes as MediaPlayerAttributes?
 
                 if (entity?.state.equals("playing")) {
                     setImageViewResource(
@@ -173,10 +176,10 @@ class MediaPlayerControlsWidget : BaseWidgetProvider() {
                     )
                 }
 
-                val artist = (entity?.attributes?.get("media_artist") ?: entity?.attributes?.get("media_album_artist"))?.toString()
-                val title = entity?.attributes?.get("media_title")?.toString()
-                val album = entity?.attributes?.get("media_album_name")?.toString()
-                var icon = entity?.attributes?.get("icon")?.toString()
+                val artist = (attributes?.mediaArtist ?: attributes?.mediaAlbumArtist)?.toString()
+                val title = attributes?.mediaTitle
+                val album = attributes?.mediaAlbumName
+                var icon = attributes?.icon
 
                 if ((artist != null || album != null) && title != null) {
                     setTextViewText(
@@ -242,7 +245,7 @@ class MediaPlayerControlsWidget : BaseWidgetProvider() {
                     iconDrawable
                 )
 
-                val entityPictureUrl = entity?.attributes?.get("entity_picture")?.toString()
+                val entityPictureUrl = attributes?.entityPicture
                 val baseUrl = urlUseCase.getUrl().toString().removeSuffix("/")
                 val url = if (entityPictureUrl?.startsWith("http") == true) entityPictureUrl else "$baseUrl$entityPictureUrl"
                 if (entityPictureUrl == null) {
@@ -393,7 +396,7 @@ class MediaPlayerControlsWidget : BaseWidgetProvider() {
                 }
 
                 if (showSource) {
-                    setTextViewText(R.id.widgetSourceLabel, entity?.attributes?.get("friendly_name").toString())
+                    setTextViewText(R.id.widgetSourceLabel, entity?.attributes?.friendlyName)
                     setViewVisibility(R.id.widgetSourceLabel, View.VISIBLE)
                 } else {
                     setViewVisibility(R.id.widgetSourceLabel, View.INVISIBLE)
@@ -407,13 +410,13 @@ class MediaPlayerControlsWidget : BaseWidgetProvider() {
     override suspend fun getAllWidgetIdsWithEntities(context: Context): Map<Int, List<String>> =
         mediaPlayCtrlWidgetDao.getAll().associate { it.id to it.entityId.split(",") }
 
-    private suspend fun getEntity(context: Context, entityIds: List<String>, suggestedEntity: Entity<Map<String, Any>>?): Entity<Map<String, Any>>? {
-        val entity: Entity<Map<String, Any>>?
+    private suspend fun getEntity(context: Context, entityIds: List<String>, suggestedEntity: Entity<EntityAttributes>?): Entity<EntityAttributes>? {
+        val entity: Entity<EntityAttributes>?
         try {
             entity = if (suggestedEntity != null && entityIds.contains(suggestedEntity.entityId)) {
                 suggestedEntity
             } else {
-                val entities: LinkedList<Entity<Map<String, Any>>?> = LinkedList()
+                val entities: LinkedList<Entity<EntityAttributes>?> = LinkedList()
                 entityIds.forEach {
                     val e = integrationUseCase.getEntity(it)
                     if (e?.state == "playing") return e
@@ -502,7 +505,7 @@ class MediaPlayerControlsWidget : BaseWidgetProvider() {
         }
     }
 
-    override suspend fun onEntityStateChanged(context: Context, appWidgetId: Int, entity: Entity<*>) {
+    override suspend fun onEntityStateChanged(context: Context, appWidgetId: Int, entity: Entity<EntityAttributes>) {
         mediaPlayCtrlWidgetDao.get(appWidgetId)?.let {
             widgetScope?.launch {
                 val views = getWidgetRemoteViews(context, appWidgetId, getEntity(context, it.entityId.split(","), null))
@@ -561,8 +564,8 @@ class MediaPlayerControlsWidget : BaseWidgetProvider() {
                 return@launch
             }
 
-            val fetchedAttributes = currentEntityInfo.attributes
-            val currentTime = fetchedAttributes["media_position"]?.toString()?.toDoubleOrNull()
+            val fetchedAttributes = currentEntityInfo.attributes as MediaPlayerAttributes
+            val currentTime = fetchedAttributes.mediaPosition
 
             if (currentTime == null) {
                 Log.d(TAG, "Failed to get entity current time, aborting call")
@@ -632,8 +635,8 @@ class MediaPlayerControlsWidget : BaseWidgetProvider() {
                 return@launch
             }
 
-            val fetchedAttributes = currentEntityInfo.attributes
-            val currentTime = fetchedAttributes["media_position"]?.toString()?.toDoubleOrNull()
+            val fetchedAttributes = currentEntityInfo.attributes as MediaPlayerAttributes
+            val currentTime = fetchedAttributes.mediaPosition
 
             if (currentTime == null) {
                 Log.d(TAG, "Failed to get entity current time, aborting call")

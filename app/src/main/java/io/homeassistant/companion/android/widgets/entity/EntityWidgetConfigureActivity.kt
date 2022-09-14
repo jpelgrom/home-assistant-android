@@ -22,6 +22,7 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.color.DynamicColors
 import dagger.hilt.android.AndroidEntryPoint
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
 import io.homeassistant.companion.android.common.data.integration.IntegrationRepository
 import io.homeassistant.companion.android.database.widget.StaticWidgetDao
 import io.homeassistant.companion.android.database.widget.WidgetBackgroundType
@@ -51,9 +52,9 @@ class EntityWidgetConfigureActivity : BaseWidgetConfigureActivity() {
     lateinit var staticWidgetDao: StaticWidgetDao
     override val dao get() = staticWidgetDao
 
-    private var entities = LinkedHashMap<String, Entity<Any>>()
+    private var entities = LinkedHashMap<String, Entity<EntityAttributes>>()
 
-    private var selectedEntity: Entity<Any>? = null
+    private var selectedEntity: Entity<EntityAttributes>? = null
     private var appendAttributes: Boolean = false
     private var selectedAttributeIds: ArrayList<String> = ArrayList()
 
@@ -145,7 +146,7 @@ class EntityWidgetConfigureActivity : BaseWidgetConfigureActivity() {
                 binding.attributeSeparator.setText(staticWidget.attributeSeparator)
             }
             if (entity != null) {
-                selectedEntity = entity as Entity<Any>?
+                selectedEntity = entity
                 setupAttributes()
             }
 
@@ -169,7 +170,7 @@ class EntityWidgetConfigureActivity : BaseWidgetConfigureActivity() {
         } else {
             binding.backgroundType.setSelection(0)
         }
-        val entityAdapter = SingleItemArrayAdapter<Entity<Any>>(this) { it?.entityId ?: "" }
+        val entityAdapter = SingleItemArrayAdapter<Entity<EntityAttributes>>(this) { it?.entityId ?: "" }
 
         binding.widgetTextConfigEntityId.setAdapter(entityAdapter)
         binding.widgetTextConfigEntityId.onFocusChangeListener = dropDownOnFocus
@@ -226,7 +227,7 @@ class EntityWidgetConfigureActivity : BaseWidgetConfigureActivity() {
 
     private val entityDropDownOnItemClick =
         AdapterView.OnItemClickListener { parent, view, position, id ->
-            selectedEntity = parent.getItemAtPosition(position) as Entity<Any>?
+            selectedEntity = parent.getItemAtPosition(position) as Entity<EntityAttributes>?
             setupAttributes()
         }
 
@@ -236,6 +237,8 @@ class EntityWidgetConfigureActivity : BaseWidgetConfigureActivity() {
         }
 
     private fun setupAttributes() {
+        // TODO fix this
+        selectedEntity?.attributes
         val fetchedAttributes = selectedEntity?.attributes as Map<String, String>
         val attributesAdapter = ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line)
         binding.widgetTextConfigAttribute.setAdapter(attributesAdapter)

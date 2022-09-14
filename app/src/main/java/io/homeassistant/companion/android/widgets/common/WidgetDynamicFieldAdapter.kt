@@ -9,13 +9,14 @@ import android.widget.MultiAutoCompleteTextView.CommaTokenizer
 import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.RecyclerView
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
 import io.homeassistant.companion.android.common.data.integration.Service
 import io.homeassistant.companion.android.databinding.WidgetButtonConfigureDynamicFieldBinding
 import kotlin.Exception
 
 class WidgetDynamicFieldAdapter(
     private val services: HashMap<String, Service>,
-    private val entities: HashMap<String, Entity<Any>>,
+    private val entities: HashMap<String, Entity<EntityAttributes>>,
     private val serviceFieldList: ArrayList<ServiceFieldBinder>
 ) : RecyclerView.Adapter<WidgetDynamicFieldAdapter.ViewHolder>() {
 

@@ -27,7 +27,10 @@ import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import io.homeassistant.companion.android.common.R
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
 import io.homeassistant.companion.android.common.data.integration.EntityExt
+import io.homeassistant.companion.android.common.data.integration.FanAttributes
+import io.homeassistant.companion.android.common.data.integration.LightAttributes
 import io.homeassistant.companion.android.common.data.integration.domain
 import io.homeassistant.companion.android.common.data.integration.getFanSpeed
 import io.homeassistant.companion.android.common.data.integration.getFanSteps
@@ -44,9 +47,10 @@ import io.homeassistant.companion.android.views.ListHeader
 import io.homeassistant.companion.android.views.ThemeLazyColumn
 import java.text.DateFormat
 
+@Suppress("UNCHECKED_CAST")
 @Composable
 fun DetailsPanelView(
-    entity: Entity<*>,
+    entity: Entity<EntityAttributes>,
     onEntityToggled: (String, String) -> Unit,
     onFanSpeedChanged: (Float) -> Unit,
     onBrightnessChanged: (Float) -> Unit,
@@ -99,14 +103,14 @@ fun DetailsPanelView(
             }
 
             if (entity.domain == "fan") {
-                if (entity.supportsFanSetSpeed()) {
+                if ((entity as Entity<FanAttributes>).supportsFanSetSpeed()) {
                     item {
                         FanSpeedSlider(entity, onFanSpeedChanged, isToastEnabled, isHapticEnabled)
                     }
                 }
             }
             if (entity.domain == "light") {
-                if (entity.supportsLightBrightness()) {
+                if ((entity as Entity<LightAttributes>).supportsLightBrightness()) {
                     item {
                         BrightnessSlider(entity, onBrightnessChanged, isToastEnabled, isHapticEnabled)
                     }
@@ -162,7 +166,7 @@ fun DetailsPanelView(
 
 @Composable
 fun FanSpeedSlider(
-    entity: Entity<*>,
+    entity: Entity<FanAttributes>,
     onFanSpeedChanged: (Float) -> Unit,
     isToastEnabled: Boolean,
     isHapticEnabled: Boolean
@@ -213,7 +217,7 @@ fun FanSpeedSlider(
 
 @Composable
 fun BrightnessSlider(
-    entity: Entity<*>,
+    entity: Entity<LightAttributes>,
     onBrightnessChanged: (Float) -> Unit,
     isToastEnabled: Boolean,
     isHapticEnabled: Boolean

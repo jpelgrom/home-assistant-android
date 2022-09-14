@@ -22,6 +22,7 @@ import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import io.homeassistant.companion.android.common.R
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
 import io.homeassistant.companion.android.common.data.integration.domain
 import io.homeassistant.companion.android.home.HomePresenterImpl
 import io.homeassistant.companion.android.theme.wearColorPalette
@@ -33,7 +34,7 @@ import io.homeassistant.companion.android.util.previewEntity3
 
 @Composable
 fun EntityUi(
-    entity: Entity<*>,
+    entity: Entity<EntityAttributes>,
     onEntityClicked: (String, String) -> Unit,
     isHapticEnabled: Boolean,
     isToastEnabled: Boolean,
@@ -42,7 +43,7 @@ fun EntityUi(
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
     val attributes = entity.attributes as Map<*, *>
-    val iconBitmap = getIcon(entity as Entity<Map<String, Any>>, entity.domain, LocalContext.current)
+    val iconBitmap = getIcon(entity, entity.domain, LocalContext.current)
     val friendlyName = attributes["friendly_name"].toString()
 
     if (entity.domain in HomePresenterImpl.toggleDomains) {

@@ -8,6 +8,7 @@ import android.service.controls.actions.ControlAction
 import android.service.controls.templates.StatelessTemplate
 import androidx.annotation.RequiresApi
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
 import io.homeassistant.companion.android.common.data.integration.IntegrationRepository
 import io.homeassistant.companion.android.common.data.integration.domain
 import io.homeassistant.companion.android.common.data.websocket.impl.entities.AreaRegistryResponse
@@ -18,7 +19,7 @@ object DefaultButtonControl : HaControl {
     override fun provideControlFeatures(
         context: Context,
         control: Control.StatefulBuilder,
-        entity: Entity<Map<String, Any>>,
+        entity: Entity<EntityAttributes>,
         area: AreaRegistryResponse?,
         baseUrl: String?
     ): Control.StatefulBuilder {
@@ -31,13 +32,13 @@ object DefaultButtonControl : HaControl {
         return control
     }
 
-    override fun getDeviceType(entity: Entity<Map<String, Any>>): Int =
+    override fun getDeviceType(entity: Entity<EntityAttributes>): Int =
         when (entity.domain) {
             "scene", "script" -> DeviceTypes.TYPE_ROUTINE
             else -> DeviceTypes.TYPE_UNKNOWN
         }
 
-    override fun getDomainString(context: Context, entity: Entity<Map<String, Any>>): String =
+    override fun getDomainString(context: Context, entity: Entity<EntityAttributes>): String =
         when (entity.domain) {
             "button" -> context.getString(commonR.string.domain_button)
             "input_button" -> context.getString(commonR.string.domain_input_button)

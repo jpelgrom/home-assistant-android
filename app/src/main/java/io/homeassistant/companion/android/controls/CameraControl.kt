@@ -12,7 +12,9 @@ import android.service.controls.templates.ThumbnailTemplate
 import android.util.Log
 import androidx.annotation.RequiresApi
 import io.homeassistant.companion.android.R
+import io.homeassistant.companion.android.common.data.integration.CameraAttributes
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
 import io.homeassistant.companion.android.common.data.integration.IntegrationRepository
 import io.homeassistant.companion.android.common.data.websocket.impl.entities.AreaRegistryResponse
 import kotlinx.coroutines.Dispatchers
@@ -31,7 +33,7 @@ object CameraControl : HaControl {
     override fun provideControlFeatures(
         context: Context,
         control: Control.StatefulBuilder,
-        entity: Entity<Map<String, Any>>,
+        entity: Entity<EntityAttributes>,
         area: AreaRegistryResponse?,
         baseUrl: String?
     ): Control.StatefulBuilder {
@@ -44,8 +46,8 @@ object CameraControl : HaControl {
             }
         )
 
-        val image = if (baseUrl != null && (entity.attributes["entity_picture"] as? String)?.isNotBlank() == true) {
-            getThumbnail(baseUrl + entity.attributes["entity_picture"] as String)
+        val image = if (baseUrl != null && (entity.attributes as CameraAttributes).entityPicture?.isNotBlank() == true) {
+            getThumbnail(baseUrl + (entity.attributes as CameraAttributes).entityPicture as String)
         } else null
         val icon = if (image != null) {
             Icon.createWithBitmap(image)
@@ -63,10 +65,10 @@ object CameraControl : HaControl {
         return control
     }
 
-    override fun getDeviceType(entity: Entity<Map<String, Any>>): Int =
+    override fun getDeviceType(entity: Entity<EntityAttributes>): Int =
         DeviceTypes.TYPE_CAMERA
 
-    override fun getDomainString(context: Context, entity: Entity<Map<String, Any>>): String =
+    override fun getDomainString(context: Context, entity: Entity<EntityAttributes>): String =
         context.getString(commonR.string.domain_camera)
 
     override suspend fun performAction(

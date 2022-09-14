@@ -34,6 +34,7 @@ import androidx.wear.compose.material.rememberScalingLazyListState
 import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
 import io.homeassistant.companion.android.home.MainViewModel
 import io.homeassistant.companion.android.theme.WearAppTheme
 import io.homeassistant.companion.android.theme.wearColorPalette
@@ -52,7 +53,7 @@ fun MainView(
     onEntityLongClicked: (String) -> Unit,
     onRetryLoadEntitiesClicked: () -> Unit,
     onSettingsClicked: () -> Unit,
-    onTestClicked: (entityLists: Map<String, List<Entity<*>>>, listOrder: List<String>, filter: (Entity<*>) -> (Boolean)) -> Unit,
+    onTestClicked: (entityLists: Map<String, List<Entity<EntityAttributes>>>, listOrder: List<String>, filter: (Entity<EntityAttributes>) -> (Boolean)) -> Unit,
     isHapticEnabled: Boolean,
     isToastEnabled: Boolean,
     deleteFavorite: (String) -> Unit
@@ -228,7 +229,7 @@ fun MainView(
                             }
                         }
 
-                        val domainEntitiesFilter: (entity: Entity<*>) -> Boolean =
+                        val domainEntitiesFilter: (entity: Entity<EntityAttributes>) -> Boolean =
                             {
                                 mainViewModel.getAreaForEntity(it.entityId) == null &&
                                     mainViewModel.getCategoryForEntity(it.entityId) == null &&

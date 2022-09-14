@@ -25,6 +25,7 @@ import androidx.wear.compose.material.items
 import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
 import io.homeassistant.companion.android.common.data.integration.domain
 import io.homeassistant.companion.android.data.SimplifiedEntity
 import io.homeassistant.companion.android.theme.WearAppTheme
@@ -36,7 +37,7 @@ import io.homeassistant.companion.android.common.R as commonR
 @Composable
 fun ChooseEntityView(
     entitiesByDomainOrder: SnapshotStateList<String>,
-    entitiesByDomain: SnapshotStateMap<String, SnapshotStateList<Entity<*>>>,
+    entitiesByDomain: SnapshotStateMap<String, SnapshotStateList<Entity<EntityAttributes>>>,
     favoriteEntityIds: State<List<String>>,
     onNoneClicked: () -> Unit,
     onEntitySelected: (entity: SimplifiedEntity) -> Unit,
@@ -117,12 +118,12 @@ fun ChooseEntityView(
 
 @Composable
 private fun ChooseEntityChip(
-    entity: Entity<*>,
+    entity: Entity<EntityAttributes>,
     onEntitySelected: (entity: SimplifiedEntity) -> Unit
 ) {
     val attributes = entity.attributes as Map<*, *>
     val iconBitmap = getIcon(
-        entity as Entity<Map<String, Any>>,
+        entity,
         entity.domain,
         LocalContext.current
     )

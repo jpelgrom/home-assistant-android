@@ -1,6 +1,10 @@
 package io.homeassistant.companion.android.common.data.integration.impl
 
 import android.util.Log
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.module.kotlin.convertValue
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.homeassistant.companion.android.common.BuildConfig
 import io.homeassistant.companion.android.common.data.HomeAssistantVersion
 import io.homeassistant.companion.android.common.data.LocalStorage
@@ -8,12 +12,14 @@ import io.homeassistant.companion.android.common.data.authentication.Authenticat
 import io.homeassistant.companion.android.common.data.integration.ControlsAuthRequiredSetting
 import io.homeassistant.companion.android.common.data.integration.DeviceRegistration
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
 import io.homeassistant.companion.android.common.data.integration.IntegrationException
 import io.homeassistant.companion.android.common.data.integration.IntegrationRepository
 import io.homeassistant.companion.android.common.data.integration.SensorRegistration
 import io.homeassistant.companion.android.common.data.integration.Service
 import io.homeassistant.companion.android.common.data.integration.UpdateLocation
 import io.homeassistant.companion.android.common.data.integration.ZoneAttributes
+import io.homeassistant.companion.android.common.data.integration.entityAttributesClassForDomain
 import io.homeassistant.companion.android.common.data.integration.impl.entities.EntityResponse
 import io.homeassistant.companion.android.common.data.integration.impl.entities.FireEventRequest
 import io.homeassistant.companion.android.common.data.integration.impl.entities.IntegrationRequest
@@ -80,6 +86,12 @@ class IntegrationRepositoryImpl @Inject constructor(
         private const val PREF_SEC_WARNING_NEXT = "sec_warning_last"
         private const val TAG = "IntegrationRepository"
         private const val RATE_LIMIT_URL = BuildConfig.RATE_LIMIT_URL
+    }
+
+    private val mapper by lazy {
+        jacksonObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
     }
 
     override suspend fun registerDevice(deviceRegistration: DeviceRegistration) {
@@ -315,7 +327,7 @@ class IntegrationRepositoryImpl @Inject constructor(
                 null
             )
         var causeException: Exception? = null
-        var zones: Array<EntityResponse<ZoneAttributes>>? = null
+        var zones: Array<EntityResponse>? = null
         for (it in urlRepository.getApiUrls()) {
             try {
                 zones = integrationService.getZones(it.toHttpUrlOrNull()!!, getZonesRequest)
@@ -558,14 +570,14 @@ class IntegrationRepositoryImpl @Inject constructor(
         }?.toList()
     }
 
-    override suspend fun getEntities(): List<Entity<Any>>? {
+    override suspend fun getEntities(): List<Entity<EntityAttributes>>? {
         val response = webSocketRepository.getStates()
 
         return response?.map {
             Entity(
                 it.entityId,
                 it.state,
-                it.attributes,
+                mapper.convertValue(it.attributes, entityAttributesClassForDomain(it.domain)),
                 it.lastChanged,
                 it.lastUpdated,
                 it.context
@@ -575,7 +587,7 @@ class IntegrationRepositoryImpl @Inject constructor(
             ?.toList()
     }
 
-    override suspend fun getEntity(entityId: String): Entity<Map<String, Any>>? {
+    override suspend fun getEntity(entityId: String): Entity<EntityAttributes>? {
         val url = urlRepository.getUrl()?.toHttpUrlOrNull()
         if (url == null) {
             Log.e(TAG, "Unable to register device due to missing URL")
@@ -589,14 +601,14 @@ class IntegrationRepositoryImpl @Inject constructor(
         return Entity(
             response.entityId,
             response.state,
-            response.attributes,
+            mapper.convertValue(response.attributes, entityAttributesClassForDomain(response.domain)),
             response.lastChanged,
             response.lastUpdated,
             response.context
         )
     }
 
-    override suspend fun getEntityUpdates(): Flow<Entity<*>>? {
+    override suspend fun getEntityUpdates(): Flow<Entity<EntityAttributes>>? {
         return webSocketRepository.getStateChanges()
             ?.filter { it.newState != null }
             ?.map {
@@ -611,7 +623,7 @@ class IntegrationRepositoryImpl @Inject constructor(
             }
     }
 
-    override suspend fun getEntityUpdates(entityIds: List<String>): Flow<Entity<*>>? {
+    override suspend fun getEntityUpdates(entityIds: List<String>): Flow<Entity<EntityAttributes>>? {
         return webSocketRepository.getStateChanges(entityIds)
             ?.filter { it.toState != null }
             ?.map {
@@ -749,14 +761,14 @@ class IntegrationRepositoryImpl @Inject constructor(
         )
     }
 
-    private fun createZonesResponse(zones: Array<EntityResponse<ZoneAttributes>>): Array<Entity<ZoneAttributes>> {
+    private fun createZonesResponse(zones: Array<EntityResponse>): Array<Entity<ZoneAttributes>> {
         val retVal = ArrayList<Entity<ZoneAttributes>>()
         zones.forEach {
             retVal.add(
                 Entity(
                     it.entityId,
                     it.state,
-                    it.attributes,
+                    mapper.convertValue(it.attributes),
                     it.lastChanged,
                     it.lastUpdated,
                     it.context

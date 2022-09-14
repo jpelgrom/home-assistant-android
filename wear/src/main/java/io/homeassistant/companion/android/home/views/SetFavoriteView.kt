@@ -19,6 +19,7 @@ import androidx.wear.compose.material.rememberScalingLazyListState
 import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
 import io.homeassistant.companion.android.common.data.integration.domain
 import io.homeassistant.companion.android.home.MainViewModel
 import io.homeassistant.companion.android.theme.WearAppTheme
@@ -83,13 +84,13 @@ fun SetFavoritesView(
 
 @Composable
 private fun FavoriteToggleChip(
-    entity: Entity<*>,
+    entity: Entity<EntityAttributes>,
     favoriteEntityIds: List<String>,
     onFavoriteSelected: (entityId: String, isSelected: Boolean) -> Unit
 ) {
     val attributes = entity.attributes as Map<*, *>
     val iconBitmap = getIcon(
-        entity as Entity<Map<String, Any>>,
+        entity,
         entity.domain,
         LocalContext.current
     )

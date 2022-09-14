@@ -7,10 +7,7 @@ import android.service.controls.actions.ControlAction
 import android.util.Log
 import androidx.annotation.RequiresApi
 import dagger.hilt.android.AndroidEntryPoint
-import io.homeassistant.companion.android.common.data.integration.ControlsAuthRequiredSetting
-import io.homeassistant.companion.android.common.data.integration.Entity
-import io.homeassistant.companion.android.common.data.integration.IntegrationRepository
-import io.homeassistant.companion.android.common.data.integration.domain
+import io.homeassistant.companion.android.common.data.integration.*
 import io.homeassistant.companion.android.common.data.url.UrlRepository
 import io.homeassistant.companion.android.common.data.websocket.WebSocketRepository
 import io.homeassistant.companion.android.common.data.websocket.impl.entities.AreaRegistryResponse
@@ -109,7 +106,7 @@ class HaControlsProviderService : ControlsProviderService() {
                             try {
                                 domainToHaControl[it.domain]?.createControl(
                                     applicationContext,
-                                    it as Entity<Map<String, Any>>,
+                                    it,
                                     areaForEntity[it.entityId],
                                     false, // Auth not required for preview
                                     null // Prevent downloading camera images
@@ -144,7 +141,7 @@ class HaControlsProviderService : ControlsProviderService() {
                         val getAreaRegistry = async { webSocketRepository.getAreaRegistry() }
                         val getDeviceRegistry = async { webSocketRepository.getDeviceRegistry() }
                         val getEntityRegistry = async { webSocketRepository.getEntityRegistry() }
-                        val entities = mutableMapOf<String, Entity<Map<String, Any>>>()
+                        val entities = mutableMapOf<String, Entity<EntityAttributes>>()
                         controlIds.forEach {
                             try {
                                 val entity = integrationRepository.getEntity(it)
@@ -171,7 +168,7 @@ class HaControlsProviderService : ControlsProviderService() {
                             integrationRepository.getEntityUpdates(controlIds)?.collect {
                                 val control = domainToHaControl[it.domain]?.createControl(
                                     applicationContext,
-                                    it as Entity<Map<String, Any>>,
+                                    it,
                                     RegistriesDataHandler.getAreaForEntity(it.entityId, areaRegistry, deviceRegistry, entityRegistry),
                                     entityRequiresAuth(it.entityId),
                                     baseUrl
@@ -242,7 +239,7 @@ class HaControlsProviderService : ControlsProviderService() {
 
     private suspend fun sendEntitiesToSubscriber(
         subscriber: Flow.Subscriber<in Control>,
-        entities: Map<String, Entity<Map<String, Any>>>,
+        entities: Map<String, Entity<EntityAttributes>>,
         areaRegistry: List<AreaRegistryResponse>?,
         deviceRegistry: List<DeviceRegistryResponse>?,
         entityRegistry: List<EntityRegistryResponse>?,
@@ -275,11 +272,11 @@ class HaControlsProviderService : ControlsProviderService() {
     private fun getFailedEntity(
         entityId: String,
         exception: Exception
-    ): Entity<Map<String, Any>> {
+    ): Entity<EntityAttributes> {
         return Entity(
             entityId = entityId,
             state = if (exception is HttpException && exception.code() == 404) "notfound" else "exception",
-            attributes = mapOf<String, String>(),
+            attributes = DefaultEntityAttributes(),
             lastChanged = Calendar.getInstance(),
             lastUpdated = Calendar.getInstance(),
             context = null

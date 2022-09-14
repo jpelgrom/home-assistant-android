@@ -12,19 +12,18 @@ import android.service.controls.templates.RangeTemplate
 import android.service.controls.templates.ToggleRangeTemplate
 import android.service.controls.templates.ToggleTemplate
 import androidx.annotation.RequiresApi
-import io.homeassistant.companion.android.common.data.integration.Entity
-import io.homeassistant.companion.android.common.data.integration.IntegrationRepository
-import io.homeassistant.companion.android.common.data.integration.getCoverPosition
+import io.homeassistant.companion.android.common.data.integration.*
 import io.homeassistant.companion.android.common.data.websocket.impl.entities.AreaRegistryResponse
 import io.homeassistant.companion.android.common.R as commonR
 
+@Suppress("UNCHECKED_CAST")
 @RequiresApi(Build.VERSION_CODES.R)
 object CoverControl : HaControl {
     const val SUPPORT_SET_POSITION = 4
     override fun provideControlFeatures(
         context: Context,
         control: Control.StatefulBuilder,
-        entity: Entity<Map<String, Any>>,
+        entity: Entity<EntityAttributes>,
         area: AreaRegistryResponse?,
         baseUrl: String?
     ): Control.StatefulBuilder {
@@ -38,9 +37,9 @@ object CoverControl : HaControl {
                 else -> entity.state
             }
         )
-        val position = entity.getCoverPosition()
+        val position = (entity as Entity<CoverAttributes>).getCoverPosition()
         control.setControlTemplate(
-            if ((entity.attributes["supported_features"] as Int) and SUPPORT_SET_POSITION == SUPPORT_SET_POSITION)
+            if (entity.attributes.supportedFeatures != null && entity.attributes.supportedFeatures!! and SUPPORT_SET_POSITION == SUPPORT_SET_POSITION)
                 ToggleRangeTemplate(
                     entity.entityId,
                     entity.state in listOf("open", "opening"),
@@ -66,8 +65,8 @@ object CoverControl : HaControl {
         return control
     }
 
-    override fun getDeviceType(entity: Entity<Map<String, Any>>): Int =
-        when (entity.attributes["device_class"]) {
+    override fun getDeviceType(entity: Entity<EntityAttributes>): Int =
+        when ((entity.attributes as CoverAttributes).deviceClass) {
             "awning" -> DeviceTypes.TYPE_AWNING
             "blind" -> DeviceTypes.TYPE_BLINDS
             "curtain" -> DeviceTypes.TYPE_CURTAIN
@@ -79,7 +78,7 @@ object CoverControl : HaControl {
             else -> DeviceTypes.TYPE_GENERIC_OPEN_CLOSE
         }
 
-    override fun getDomainString(context: Context, entity: Entity<Map<String, Any>>): String =
+    override fun getDomainString(context: Context, entity: Entity<EntityAttributes>): String =
         context.getString(commonR.string.domain_cover)
 
     override suspend fun performAction(

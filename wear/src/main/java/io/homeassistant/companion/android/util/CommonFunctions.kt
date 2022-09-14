@@ -7,7 +7,13 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
+import io.homeassistant.companion.android.common.data.integration.ButtonAttributes
+import io.homeassistant.companion.android.common.data.integration.CoverAttributes
+import io.homeassistant.companion.android.common.data.integration.DefaultEntityAttributes
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
+import io.homeassistant.companion.android.common.data.integration.InputDateTimeAttributes
+import io.homeassistant.companion.android.common.data.integration.SwitchAttributes
 import io.homeassistant.companion.android.home.HomePresenterImpl
 import java.util.Calendar
 import io.homeassistant.companion.android.common.R as commonR
@@ -32,19 +38,19 @@ fun stringForDomain(domain: String, context: Context): String? =
         )[domain]?.let { context.getString(it) }
 
 fun getIcon(icon: String?, domain: String, context: Context): IIcon? {
-    val simpleEntity = Entity(
+    val simpleEntity: Entity<EntityAttributes> = Entity(
         "",
         "",
-        mapOf("icon" to icon),
+        DefaultEntityAttributes(icon = icon),
         Calendar.getInstance(),
         Calendar.getInstance(),
         null
     )
-    return getIcon(simpleEntity as Entity<Map<String, Any>>, domain, context)
+    return getIcon(simpleEntity, domain, context)
 }
 
-fun getIcon(entity: Entity<Map<String, Any>>?, domain: String, context: Context): IIcon? {
-    val icon = entity?.attributes?.get("icon") as? String
+fun getIcon(entity: Entity<EntityAttributes>?, domain: String, context: Context): IIcon? {
+    val icon = entity?.attributes?.icon
     return if (icon?.startsWith("mdi") == true) {
         val mdiIcon = icon.split(":")[1]
         IconicsDrawable(context, "cmd-$mdiIcon").icon
@@ -58,12 +64,12 @@ fun getIcon(entity: Entity<Map<String, Any>>?, domain: String, context: Context)
             if (entity?.state?.isNotBlank() == true)
                 entity.state
             else
-                entity?.attributes?.get("state") as String?
+                entity?.attributes?.state
         when (domain) {
             "alert" -> CommunityMaterial.Icon.cmd_alert
             "air_quality" -> CommunityMaterial.Icon.cmd_air_filter
             "automation" -> CommunityMaterial.Icon3.cmd_robot
-            "button" -> when (entity?.attributes?.get("device_class")) {
+            "button" -> when ((entity?.attributes as ButtonAttributes?)?.deviceClass) {
                 "restart" -> CommunityMaterial.Icon3.cmd_restart
                 "update" -> CommunityMaterial.Icon3.cmd_package_up
                 else -> CommunityMaterial.Icon2.cmd_gesture_tap_button
@@ -73,7 +79,7 @@ fun getIcon(entity: Entity<Map<String, Any>>?, domain: String, context: Context)
             "climate" -> CommunityMaterial.Icon3.cmd_thermostat
             "configurator" -> CommunityMaterial.Icon.cmd_cog
             "conversation" -> CommunityMaterial.Icon3.cmd_text_to_speech
-            "cover" -> coverIcon(compareState, entity)
+            "cover" -> coverIcon(compareState, entity as Entity<CoverAttributes>)
             "counter" -> CommunityMaterial.Icon.cmd_counter
             "fan" -> CommunityMaterial.Icon2.cmd_fan
             "google_assistant" -> CommunityMaterial.Icon2.cmd_google_assistant
@@ -90,9 +96,9 @@ fun getIcon(entity: Entity<Map<String, Any>>?, domain: String, context: Context)
                 CommunityMaterial.Icon2.cmd_light_switch
             }
             "input_button" -> CommunityMaterial.Icon2.cmd_gesture_tap_button
-            "input_datetime" -> if (entity?.attributes?.get("has_date") == false)
+            "input_datetime" -> if ((entity?.attributes as InputDateTimeAttributes?)?.hasDate == false)
                 CommunityMaterial.Icon.cmd_clock
-            else if (entity?.attributes?.get("has_time") == false)
+            else if ((entity?.attributes as InputDateTimeAttributes?)?.hasTime == false)
                 CommunityMaterial.Icon.cmd_calendar
             else
                 CommunityMaterial.Icon.cmd_calendar_clock
@@ -124,7 +130,7 @@ fun getIcon(entity: Entity<Map<String, Any>>?, domain: String, context: Context)
             else
                 CommunityMaterial.Icon3.cmd_weather_night
             "switch" -> if (entity?.entityId?.isNotBlank() == true) {
-                when (entity.attributes["device_class"]) {
+                when ((entity.attributes as SwitchAttributes?)?.deviceClass) {
                     "outlet" -> if (compareState == "on") CommunityMaterial.Icon3.cmd_power_plug else CommunityMaterial.Icon3.cmd_power_plug_off
                     "switch" -> if (compareState == "on") CommunityMaterial.Icon3.cmd_toggle_switch else CommunityMaterial.Icon3.cmd_toggle_switch_off
                     else -> CommunityMaterial.Icon2.cmd_flash
@@ -143,10 +149,10 @@ fun getIcon(entity: Entity<Map<String, Any>>?, domain: String, context: Context)
     }
 }
 
-private fun coverIcon(state: String?, entity: Entity<Map<String, Any>>?): IIcon? {
+private fun coverIcon(state: String?, entity: Entity<CoverAttributes>?): IIcon? {
     val open = state !== "closed"
 
-    return when (entity?.attributes?.get("device_class")) {
+    return when (entity?.attributes?.deviceClass) {
         "garage" -> when (state) {
             "opening" -> CommunityMaterial.Icon.cmd_arrow_up_box
             "closing" -> CommunityMaterial.Icon.cmd_arrow_down_box

@@ -10,6 +10,7 @@ import android.service.controls.templates.ControlButton
 import android.service.controls.templates.ToggleTemplate
 import androidx.annotation.RequiresApi
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
 import io.homeassistant.companion.android.common.data.integration.IntegrationRepository
 import io.homeassistant.companion.android.common.data.websocket.impl.entities.AreaRegistryResponse
 import io.homeassistant.companion.android.common.R as commonR
@@ -19,7 +20,7 @@ object LockControl : HaControl {
     override fun provideControlFeatures(
         context: Context,
         control: Control.StatefulBuilder,
-        entity: Entity<Map<String, Any>>,
+        entity: Entity<EntityAttributes>,
         area: AreaRegistryResponse?,
         baseUrl: String?
     ): Control.StatefulBuilder {
@@ -46,10 +47,10 @@ object LockControl : HaControl {
         return control
     }
 
-    override fun getDeviceType(entity: Entity<Map<String, Any>>): Int =
+    override fun getDeviceType(entity: Entity<EntityAttributes>): Int =
         DeviceTypes.TYPE_LOCK
 
-    override fun getDomainString(context: Context, entity: Entity<Map<String, Any>>): String =
+    override fun getDomainString(context: Context, entity: Entity<EntityAttributes>): String =
         context.getString(commonR.string.domain_lock)
 
     override suspend fun performAction(

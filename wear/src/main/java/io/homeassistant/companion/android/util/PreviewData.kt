@@ -1,12 +1,14 @@
 package io.homeassistant.companion.android.util
 
+import io.homeassistant.companion.android.common.data.integration.DefaultEntityAttributes
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
 import io.homeassistant.companion.android.data.SimplifiedEntity
 import java.util.Calendar
 
-val attributes: Map<*, *> = mapOf(
-    "friendly_name" to "Testing",
-    "icon" to "mdi:cellphone"
+val attributes: EntityAttributes = DefaultEntityAttributes(
+    friendlyName = "Testing",
+    icon = "mdi:cellphone"
 )
 
 private val calendar: Calendar = Calendar.getInstance()
@@ -23,8 +25,8 @@ val previewEntityList = mapOf(
 
 val previewFavoritesList = listOf("light.first", "scene.first")
 
-val simplifiedEntity = SimplifiedEntity(previewEntity1.entityId, attributes["friendly_name"].toString(), attributes["icon"].toString())
+val simplifiedEntity = SimplifiedEntity(previewEntity1.entityId, attributes.friendlyName!!, attributes.icon!!)
 
-val playPreviewEntityScene1 = Entity("scene.first", "on", mapOf("friendly_name" to "Cleaning mode"), calendar, calendar, mapOf())
-val playPreviewEntityScene2 = Entity("scene.second", "on", mapOf("friendly_name" to "Colorful"), calendar, calendar, mapOf())
-val playPreviewEntityScene3 = Entity("scene.third", "on", mapOf("friendly_name" to "Goodbye"), calendar, calendar, mapOf())
+val playPreviewEntityScene1 = Entity("scene.first", "on", DefaultEntityAttributes(friendlyName = "Cleaning mode") as EntityAttributes, calendar, calendar, mapOf())
+val playPreviewEntityScene2 = Entity("scene.second", "on", DefaultEntityAttributes(friendlyName = "Colorful") as EntityAttributes, calendar, calendar, mapOf())
+val playPreviewEntityScene3 = Entity("scene.third", "on", DefaultEntityAttributes(friendlyName = "Goodbye") as EntityAttributes, calendar, calendar, mapOf())

@@ -11,6 +11,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
 import io.homeassistant.companion.android.common.data.integration.domain
 import io.homeassistant.companion.android.common.data.websocket.WebSocketState
 import io.homeassistant.companion.android.common.data.websocket.impl.entities.AreaRegistryResponse
@@ -55,7 +56,7 @@ class MainViewModel @Inject constructor(
     }
 
     // entities
-    var entities = mutableStateMapOf<String, Entity<*>>()
+    var entities = mutableStateMapOf<String, Entity<EntityAttributes>>()
         private set
 
     /**
@@ -68,9 +69,9 @@ class MainViewModel @Inject constructor(
     var areas = mutableListOf<AreaRegistryResponse>()
         private set
 
-    var entitiesByArea = mutableStateMapOf<String, SnapshotStateList<Entity<*>>>()
+    var entitiesByArea = mutableStateMapOf<String, SnapshotStateList<Entity<EntityAttributes>>>()
         private set
-    var entitiesByDomain = mutableStateMapOf<String, SnapshotStateList<Entity<*>>>()
+    var entitiesByDomain = mutableStateMapOf<String, SnapshotStateList<Entity<EntityAttributes>>>()
         private set
     var entitiesByAreaOrder = mutableStateListOf<String>()
         private set
@@ -78,9 +79,9 @@ class MainViewModel @Inject constructor(
         private set
 
     // Content of EntityListView
-    var entityLists = mutableStateMapOf<String, List<Entity<*>>>()
+    var entityLists = mutableStateMapOf<String, List<Entity<EntityAttributes>>>()
     var entityListsOrder = mutableStateListOf<String>()
-    var entityListFilter: (Entity<*>) -> Boolean = { true }
+    var entityListFilter: (Entity<EntityAttributes>) -> Boolean = { true }
 
     // settings
     var loadingState = mutableStateOf(LoadingState.LOADING)
@@ -199,12 +200,11 @@ class MainViewModel @Inject constructor(
 
         // Create a list with all areas + their entities
         areasList.forEach { area ->
-            val entitiesInArea = mutableStateListOf<Entity<*>>()
+            val entitiesInArea = mutableStateListOf<Entity<EntityAttributes>>()
             entitiesInArea.addAll(
                 entitiesList
                     .filter { getAreaForEntity(it.entityId)?.areaId == area.areaId }
-                    .map { it as Entity<Map<String, Any>> }
-                    .sortedBy { (it.attributes["friendly_name"] ?: it.entityId) as String }
+                    .sortedBy { it.attributes.friendlyName ?: it.entityId }
             )
             entitiesByArea[area.areaId]?.let {
                 it.clear()
@@ -224,7 +224,7 @@ class MainViewModel @Inject constructor(
 
         // Create a list with all discovered domains + their entities
         domainsList.forEach { domain ->
-            val entitiesInDomain = mutableStateListOf<Entity<*>>()
+            val entitiesInDomain = mutableStateListOf<Entity<EntityAttributes>>()
             entitiesInDomain.addAll(entitiesList.filter { it.domain == domain })
             entitiesByDomain[domain]?.let {
                 it.clear()

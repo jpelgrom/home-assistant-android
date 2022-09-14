@@ -10,6 +10,7 @@ import android.service.controls.templates.ControlButton
 import android.service.controls.templates.ToggleTemplate
 import androidx.annotation.RequiresApi
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
 import io.homeassistant.companion.android.common.data.integration.IntegrationRepository
 import io.homeassistant.companion.android.common.data.integration.domain
 import io.homeassistant.companion.android.common.data.websocket.impl.entities.AreaRegistryResponse
@@ -20,7 +21,7 @@ object DefaultSwitchControl : HaControl {
     override fun provideControlFeatures(
         context: Context,
         control: Control.StatefulBuilder,
-        entity: Entity<Map<String, Any>>,
+        entity: Entity<EntityAttributes>,
         area: AreaRegistryResponse?,
         baseUrl: String?
     ): Control.StatefulBuilder {
@@ -36,13 +37,13 @@ object DefaultSwitchControl : HaControl {
         return control
     }
 
-    override fun getDeviceType(entity: Entity<Map<String, Any>>): Int =
+    override fun getDeviceType(entity: Entity<EntityAttributes>): Int =
         when (entity.domain) {
             "switch" -> DeviceTypes.TYPE_SWITCH
             else -> DeviceTypes.TYPE_GENERIC_ON_OFF
         }
 
-    override fun getDomainString(context: Context, entity: Entity<Map<String, Any>>): String =
+    override fun getDomainString(context: Context, entity: Entity<EntityAttributes>): String =
         when (entity.domain) {
             "automation" -> context.getString(commonR.string.domain_automation)
             "input_boolean" -> context.getString(commonR.string.domain_input_boolean)

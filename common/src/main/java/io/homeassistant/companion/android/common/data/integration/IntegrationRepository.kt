@@ -66,10 +66,10 @@ interface IntegrationRepository {
     suspend fun getConfig(): GetConfigResponse
     suspend fun getServices(): List<Service>?
 
-    suspend fun getEntities(): List<Entity<Any>>?
-    suspend fun getEntity(entityId: String): Entity<Map<String, Any>>?
-    suspend fun getEntityUpdates(): Flow<Entity<*>>?
-    suspend fun getEntityUpdates(entityIds: List<String>): Flow<Entity<*>>?
+    suspend fun getEntities(): List<Entity<EntityAttributes>>?
+    suspend fun getEntity(entityId: String): Entity<EntityAttributes>?
+    suspend fun getEntityUpdates(): Flow<Entity<EntityAttributes>>?
+    suspend fun getEntityUpdates(entityIds: List<String>): Flow<Entity<EntityAttributes>>?
 
     suspend fun callService(domain: String, service: String, serviceData: HashMap<String, Any>)
 

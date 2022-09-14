@@ -9,7 +9,9 @@ import android.service.controls.actions.FloatAction
 import android.service.controls.templates.RangeTemplate
 import androidx.annotation.RequiresApi
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
 import io.homeassistant.companion.android.common.data.integration.IntegrationRepository
+import io.homeassistant.companion.android.common.data.integration.SliderAttributes
 import io.homeassistant.companion.android.common.data.websocket.impl.entities.AreaRegistryResponse
 import kotlinx.coroutines.runBlocking
 import io.homeassistant.companion.android.common.R as commonR
@@ -19,7 +21,7 @@ object DefaultSliderControl : HaControl {
     override fun provideControlFeatures(
         context: Context,
         control: Control.StatefulBuilder,
-        entity: Entity<Map<String, Any>>,
+        entity: Entity<EntityAttributes>,
         area: AreaRegistryResponse?,
         baseUrl: String?
     ): Control.StatefulBuilder {
@@ -27,20 +29,20 @@ object DefaultSliderControl : HaControl {
         control.setControlTemplate(
             RangeTemplate(
                 entity.entityId,
-                (entity.attributes["min"] as? Number)?.toFloat() ?: 0f,
-                (entity.attributes["max"] as? Number)?.toFloat() ?: 1f,
+                (entity.attributes as SliderAttributes).min?.toFloat() ?: 0f,
+                (entity.attributes as SliderAttributes).max?.toFloat() ?: 1f,
                 entity.state.toFloatOrNull() ?: 0f,
-                (entity.attributes["step"] as? Number)?.toFloat() ?: 1f,
+                (entity.attributes as SliderAttributes).step?.toFloat() ?: 1f,
                 null
             )
         )
         return control
     }
 
-    override fun getDeviceType(entity: Entity<Map<String, Any>>): Int =
+    override fun getDeviceType(entity: Entity<EntityAttributes>): Int =
         DeviceTypes.TYPE_UNKNOWN
 
-    override fun getDomainString(context: Context, entity: Entity<Map<String, Any>>): String =
+    override fun getDomainString(context: Context, entity: Entity<EntityAttributes>): String =
         context.getString(commonR.string.domain_input_number)
 
     override suspend fun performAction(

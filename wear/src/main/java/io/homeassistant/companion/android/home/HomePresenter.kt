@@ -1,6 +1,7 @@
 package io.homeassistant.companion.android.home
 
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
 import io.homeassistant.companion.android.common.data.websocket.WebSocketState
 import io.homeassistant.companion.android.common.data.websocket.impl.entities.AreaRegistryResponse
 import io.homeassistant.companion.android.common.data.websocket.impl.entities.AreaRegistryUpdatedEvent
@@ -27,8 +28,8 @@ interface HomePresenter {
     suspend fun isConnected(): Boolean
     fun getWebSocketState(): WebSocketState?
 
-    suspend fun getEntities(): List<Entity<*>>?
-    suspend fun getEntityUpdates(): Flow<Entity<*>>?
+    suspend fun getEntities(): List<Entity<EntityAttributes>>?
+    suspend fun getEntityUpdates(): Flow<Entity<EntityAttributes>>?
 
     suspend fun getAreaRegistry(): List<AreaRegistryResponse>?
     suspend fun getDeviceRegistry(): List<DeviceRegistryResponse>?

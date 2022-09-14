@@ -10,7 +10,9 @@ import android.service.controls.templates.ControlButton
 import android.service.controls.templates.ToggleTemplate
 import androidx.annotation.RequiresApi
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
 import io.homeassistant.companion.android.common.data.integration.IntegrationRepository
+import io.homeassistant.companion.android.common.data.integration.VacuumAttributes
 import io.homeassistant.companion.android.common.data.websocket.impl.entities.AreaRegistryResponse
 import io.homeassistant.companion.android.common.R as commonR
 
@@ -22,12 +24,13 @@ object VacuumControl : HaControl {
     override fun provideControlFeatures(
         context: Context,
         control: Control.StatefulBuilder,
-        entity: Entity<Map<String, Any>>,
+        entity: Entity<EntityAttributes>,
         area: AreaRegistryResponse?,
         baseUrl: String?
     ): Control.StatefulBuilder {
-        entitySupportedFeatures = entity.attributes["supported_features"] as Int
-        if (entitySupportedFeatures and SUPPORT_TURN_ON != SUPPORT_TURN_ON) {
+        if ((entity.attributes as VacuumAttributes).supportedFeatures != null &&
+            (entity.attributes as VacuumAttributes).supportedFeatures!! and SUPPORT_TURN_ON != SUPPORT_TURN_ON
+        ) {
             control.setStatusText(
                 when (entity.state) {
                     "cleaning" -> context.getString(commonR.string.state_cleaning)
@@ -56,10 +59,10 @@ object VacuumControl : HaControl {
         return control
     }
 
-    override fun getDeviceType(entity: Entity<Map<String, Any>>): Int =
+    override fun getDeviceType(entity: Entity<EntityAttributes>): Int =
         DeviceTypes.TYPE_VACUUM
 
-    override fun getDomainString(context: Context, entity: Entity<Map<String, Any>>): String =
+    override fun getDomainString(context: Context, entity: Entity<EntityAttributes>): String =
         context.getString(commonR.string.domain_vacuum)
 
     override suspend fun performAction(

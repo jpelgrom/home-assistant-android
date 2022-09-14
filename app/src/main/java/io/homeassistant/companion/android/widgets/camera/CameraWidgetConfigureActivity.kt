@@ -15,6 +15,7 @@ import androidx.core.content.getSystemService
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
 import io.homeassistant.companion.android.common.data.integration.IntegrationRepository
 import io.homeassistant.companion.android.common.data.integration.domain
 import io.homeassistant.companion.android.database.widget.CameraWidgetDao
@@ -40,8 +41,8 @@ class CameraWidgetConfigureActivity : BaseWidgetConfigureActivity() {
     @Inject
     lateinit var integrationUseCase: IntegrationRepository
 
-    private var entities = LinkedHashMap<String, Entity<Any>>()
-    private var selectedEntity: Entity<Any>? = null
+    private var entities = LinkedHashMap<String, Entity<EntityAttributes>>()
+    private var selectedEntity: Entity<EntityAttributes>? = null
 
     @Inject
     lateinit var cameraWidgetDao: CameraWidgetDao
@@ -109,11 +110,11 @@ class CameraWidgetConfigureActivity : BaseWidgetConfigureActivity() {
                 }
             }
             if (entity != null) {
-                selectedEntity = entity as Entity<Any>?
+                selectedEntity
             }
         }
 
-        val entityAdapter = SingleItemArrayAdapter<Entity<Any>>(this) { it?.entityId ?: "" }
+        val entityAdapter = SingleItemArrayAdapter<Entity<EntityAttributes>>(this) { it?.entityId ?: "" }
 
         binding.widgetTextConfigEntityId.setAdapter(entityAdapter)
         binding.widgetTextConfigEntityId.onFocusChangeListener = dropDownOnFocus
@@ -150,7 +151,7 @@ class CameraWidgetConfigureActivity : BaseWidgetConfigureActivity() {
 
     private val entityDropDownOnItemClick =
         AdapterView.OnItemClickListener { parent, _, position, _ ->
-            selectedEntity = parent.getItemAtPosition(position) as Entity<Any>?
+            selectedEntity = parent.getItemAtPosition(position) as Entity<EntityAttributes>?
         }
 
     private fun onAddWidget() {

@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.RemoteViews
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
 import io.homeassistant.companion.android.common.data.integration.IntegrationRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -172,8 +173,8 @@ abstract class BaseWidgetProvider : AppWidgetProvider() {
     }
 
     abstract fun getWidgetProvider(context: Context): ComponentName
-    abstract suspend fun getWidgetRemoteViews(context: Context, appWidgetId: Int, suggestedEntity: Entity<Map<String, Any>>? = null): RemoteViews
+    abstract suspend fun getWidgetRemoteViews(context: Context, appWidgetId: Int, suggestedEntity: Entity<EntityAttributes>? = null): RemoteViews
     abstract suspend fun getAllWidgetIdsWithEntities(context: Context): Map<Int, List<String>>
     abstract fun saveEntityConfiguration(context: Context, extras: Bundle?, appWidgetId: Int)
-    abstract suspend fun onEntityStateChanged(context: Context, appWidgetId: Int, entity: Entity<*>)
+    abstract suspend fun onEntityStateChanged(context: Context, appWidgetId: Int, entity: Entity<EntityAttributes>)
 }

@@ -18,6 +18,7 @@ import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
 import io.homeassistant.companion.android.BuildConfig
 import io.homeassistant.companion.android.R
+import io.homeassistant.companion.android.common.data.integration.CameraAttributes
 import io.homeassistant.companion.android.common.data.integration.IntegrationRepository
 import io.homeassistant.companion.android.common.data.url.UrlRepository
 import io.homeassistant.companion.android.database.widget.CameraWidgetDao
@@ -190,7 +191,7 @@ class CameraWidget : AppWidgetProvider() {
 
     private suspend fun retrieveCameraImageUrl(entityId: String): String? {
         val entity = integrationUseCase.getEntity(entityId)
-        return entity?.attributes?.get("entity_picture")?.toString()
+        return entity?.let { (it.attributes as CameraAttributes).entityPicture }
     }
 
     override fun onReceive(context: Context, intent: Intent) {

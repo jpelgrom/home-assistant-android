@@ -6,6 +6,7 @@ import io.homeassistant.companion.android.common.data.authentication.Authenticat
 import io.homeassistant.companion.android.common.data.authentication.SessionState
 import io.homeassistant.companion.android.common.data.integration.DeviceRegistration
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
 import io.homeassistant.companion.android.common.data.integration.IntegrationRepository
 import io.homeassistant.companion.android.common.data.websocket.WebSocketRepository
 import io.homeassistant.companion.android.common.data.websocket.WebSocketState
@@ -73,11 +74,11 @@ class HomePresenterImpl @Inject constructor(
         }
     }
 
-    override suspend fun getEntities(): List<Entity<*>>? {
+    override suspend fun getEntities(): List<Entity<EntityAttributes>>? {
         return integrationUseCase.getEntities()
     }
 
-    override suspend fun getEntityUpdates(): Flow<Entity<*>>? {
+    override suspend fun getEntityUpdates(): Flow<Entity<EntityAttributes>>? {
         return integrationUseCase.getEntityUpdates()
     }
 

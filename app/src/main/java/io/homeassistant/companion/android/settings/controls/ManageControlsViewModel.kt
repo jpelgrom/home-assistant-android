@@ -10,10 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.homeassistant.companion.android.common.data.integration.ControlsAuthRequiredSetting
-import io.homeassistant.companion.android.common.data.integration.Entity
-import io.homeassistant.companion.android.common.data.integration.IntegrationRepository
-import io.homeassistant.companion.android.common.data.integration.domain
+import io.homeassistant.companion.android.common.data.integration.*
 import io.homeassistant.companion.android.controls.HaControlsProviderService
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -33,7 +30,7 @@ class ManageControlsViewModel @Inject constructor(
     var entitiesLoaded by mutableStateOf(false)
         private set
 
-    val entitiesList = mutableStateListOf<Entity<*>>()
+    val entitiesList = mutableStateListOf<Entity<EntityAttributes>>()
 
     init {
         viewModelScope.launch {
@@ -44,7 +41,7 @@ class ManageControlsViewModel @Inject constructor(
                 ?.filter { it.domain in HaControlsProviderService.getSupportedDomains() }
                 ?.sortedWith(
                     compareBy(String.CASE_INSENSITIVE_ORDER) {
-                        (it.attributes as Map<String, Any>)["friendly_name"].toString()
+                        it.attributes.friendlyName ?: it.entityId
                     }
                 )
             if (entities != null) {

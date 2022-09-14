@@ -27,6 +27,7 @@ import com.maltaisn.iconpack.mdi.createMaterialDesignIconPack
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.homeassistant.companion.android.common.R
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
 import io.homeassistant.companion.android.common.data.integration.IntegrationRepository
 import io.homeassistant.companion.android.webview.WebViewActivity
 import kotlinx.coroutines.launch
@@ -49,7 +50,7 @@ class ManageShortcutsViewModel @Inject constructor(
     var dynamicShortcuts: MutableList<ShortcutInfo> = shortcutManager.dynamicShortcuts
         private set
 
-    var entities = mutableStateMapOf<String, Entity<*>>()
+    var entities = mutableStateMapOf<String, Entity<EntityAttributes>>()
         private set
 
     data class Shortcut(

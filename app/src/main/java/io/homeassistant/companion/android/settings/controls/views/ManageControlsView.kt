@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import io.homeassistant.companion.android.common.data.integration.ControlsAuthRequiredSetting
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
 import io.homeassistant.companion.android.common.data.integration.domain
 import io.homeassistant.companion.android.util.compose.getEntityDomainString
 import io.homeassistant.companion.android.common.R as commonR
@@ -35,7 +36,7 @@ fun ManageControlsView(
     authSetting: ControlsAuthRequiredSetting,
     authRequiredList: List<String>,
     entitiesLoaded: Boolean,
-    entitiesList: List<Entity<*>>,
+    entitiesList: List<Entity<EntityAttributes>>,
     onSelectAll: () -> Unit,
     onSelectNone: () -> Unit,
     onSelectEntity: (String) -> Unit
@@ -69,12 +70,9 @@ fun ManageControlsView(
                     }
                 }
                 items(entitiesList.size, key = { entitiesList[it].entityId }) { index ->
-                    val entity = entitiesList[index] as Entity<Map<String, Any>>
+                    val entity = entitiesList[index]
                     ManageControlsEntity(
-                        entityName = (
-                            entity.attributes["friendly_name"]
-                                ?: entity.entityId
-                            ) as String,
+                        entityName = entity.attributes.friendlyName ?: entity.entityId,
                         entityDomain = entity.domain,
                         selected = (
                             authSetting == ControlsAuthRequiredSetting.NONE ||

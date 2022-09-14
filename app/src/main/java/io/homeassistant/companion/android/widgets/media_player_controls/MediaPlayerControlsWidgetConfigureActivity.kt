@@ -17,6 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.color.DynamicColors
 import dagger.hilt.android.AndroidEntryPoint
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
 import io.homeassistant.companion.android.common.data.integration.IntegrationRepository
 import io.homeassistant.companion.android.common.data.integration.domain
 import io.homeassistant.companion.android.database.widget.MediaPlayerControlsWidgetDao
@@ -51,8 +52,8 @@ class MediaPlayerControlsWidgetConfigureActivity : BaseWidgetConfigureActivity()
 
     private lateinit var binding: WidgetMediaControlsConfigureBinding
 
-    private var entities = LinkedHashMap<String, Entity<Any>>()
-    private var selectedEntities: LinkedList<Entity<*>?> = LinkedList()
+    private var entities = LinkedHashMap<String, Entity<EntityAttributes>>()
+    private var selectedEntities: LinkedList<Entity<EntityAttributes>?> = LinkedList()
 
     public override fun onCreate(icicle: Bundle?) {
         super.onCreate(icicle)
@@ -147,7 +148,7 @@ class MediaPlayerControlsWidgetConfigureActivity : BaseWidgetConfigureActivity()
                 selectedEntities.addAll(entities)
             binding.addButton.setText(commonR.string.update_widget)
         }
-        val entityAdapter = SingleItemArrayAdapter<Entity<Any>>(this) { it?.entityId ?: "" }
+        val entityAdapter = SingleItemArrayAdapter<Entity<EntityAttributes>>(this) { it?.entityId ?: "" }
 
         binding.widgetTextConfigEntityId.setAdapter(entityAdapter)
         binding.widgetTextConfigEntityId.setTokenizer(MultiAutoCompleteTextView.CommaTokenizer())

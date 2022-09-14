@@ -12,23 +12,21 @@ import android.service.controls.templates.RangeTemplate
 import android.service.controls.templates.ToggleRangeTemplate
 import android.service.controls.templates.ToggleTemplate
 import androidx.annotation.RequiresApi
-import io.homeassistant.companion.android.common.data.integration.Entity
-import io.homeassistant.companion.android.common.data.integration.IntegrationRepository
-import io.homeassistant.companion.android.common.data.integration.getLightBrightness
-import io.homeassistant.companion.android.common.data.integration.supportsLightBrightness
+import io.homeassistant.companion.android.common.data.integration.*
 import io.homeassistant.companion.android.common.data.websocket.impl.entities.AreaRegistryResponse
 import io.homeassistant.companion.android.common.R as commonR
 
+@Suppress("UNCHECKED_CAST")
 @RequiresApi(Build.VERSION_CODES.R)
 object LightControl : HaControl {
     override fun provideControlFeatures(
         context: Context,
         control: Control.StatefulBuilder,
-        entity: Entity<Map<String, Any>>,
+        entity: Entity<EntityAttributes>,
         area: AreaRegistryResponse?,
         baseUrl: String?
     ): Control.StatefulBuilder {
-        val position = entity.getLightBrightness()
+        val position = (entity as Entity<LightAttributes>).getLightBrightness()
         control.setControlTemplate(
             if (entity.supportsLightBrightness())
                 ToggleRangeTemplate(
@@ -56,10 +54,10 @@ object LightControl : HaControl {
         return control
     }
 
-    override fun getDeviceType(entity: Entity<Map<String, Any>>): Int =
+    override fun getDeviceType(entity: Entity<EntityAttributes>): Int =
         DeviceTypes.TYPE_LIGHT
 
-    override fun getDomainString(context: Context, entity: Entity<Map<String, Any>>): String =
+    override fun getDomainString(context: Context, entity: Entity<EntityAttributes>): String =
         context.getString(commonR.string.domain_light)
 
     override suspend fun performAction(

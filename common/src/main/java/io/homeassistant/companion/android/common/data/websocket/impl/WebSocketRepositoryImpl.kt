@@ -119,7 +119,7 @@ class WebSocketRepositoryImpl @Inject constructor(
         return mapResponse(socketResponse)
     }
 
-    override suspend fun getStates(): List<EntityResponse<Any>>? {
+    override suspend fun getStates(): List<EntityResponse>? {
         val socketResponse = sendMessage(
             mapOf(
                 "type" to "get_states"

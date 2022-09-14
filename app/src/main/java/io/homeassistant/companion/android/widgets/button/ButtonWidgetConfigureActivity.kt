@@ -35,6 +35,7 @@ import com.maltaisn.icondialog.pack.IconPackLoader
 import com.maltaisn.iconpack.mdi.createMaterialDesignIconPack
 import dagger.hilt.android.AndroidEntryPoint
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
 import io.homeassistant.companion.android.common.data.integration.IntegrationRepository
 import io.homeassistant.companion.android.common.data.integration.Service
 import io.homeassistant.companion.android.database.widget.ButtonWidgetDao
@@ -68,7 +69,7 @@ class ButtonWidgetConfigureActivity : BaseWidgetConfigureActivity(), IconDialog.
     private lateinit var iconPack: IconPack
 
     private var services = HashMap<String, Service>()
-    private var entities = HashMap<String, Entity<Any>>()
+    private var entities = HashMap<String, Entity<EntityAttributes>>()
     private var dynamicFields = ArrayList<ServiceFieldBinder>()
     private lateinit var dynamicFieldAdapter: WidgetDynamicFieldAdapter
 

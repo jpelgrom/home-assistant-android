@@ -9,6 +9,7 @@ import android.service.controls.actions.ControlAction
 import androidx.annotation.RequiresApi
 import io.homeassistant.companion.android.common.R
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
 import io.homeassistant.companion.android.common.data.integration.IntegrationRepository
 import io.homeassistant.companion.android.common.data.websocket.impl.entities.AreaRegistryResponse
 import io.homeassistant.companion.android.webview.WebViewActivity
@@ -18,7 +19,7 @@ interface HaControl {
 
     fun createControl(
         context: Context,
-        entity: Entity<Map<String, Any>>,
+        entity: Entity<EntityAttributes>,
         area: AreaRegistryResponse?,
         authRequired: Boolean,
         baseUrl: String?
@@ -33,7 +34,7 @@ interface HaControl {
                 PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_MUTABLE
             )
         )
-        control.setTitle((entity.attributes["friendly_name"] ?: entity.entityId) as CharSequence)
+        control.setTitle((entity.attributes.friendlyName ?: entity.entityId) as CharSequence)
         control.setSubtitle(area?.name ?: "")
         control.setDeviceType(getDeviceType(entity))
         control.setZone(area?.name ?: getDomainString(context, entity))
@@ -56,14 +57,14 @@ interface HaControl {
     fun provideControlFeatures(
         context: Context,
         control: Control.StatefulBuilder,
-        entity: Entity<Map<String, Any>>,
+        entity: Entity<EntityAttributes>,
         area: AreaRegistryResponse?,
         baseUrl: String?
     ): Control.StatefulBuilder
 
-    fun getDeviceType(entity: Entity<Map<String, Any>>): Int
+    fun getDeviceType(entity: Entity<EntityAttributes>): Int
 
-    fun getDomainString(context: Context, entity: Entity<Map<String, Any>>): String
+    fun getDomainString(context: Context, entity: Entity<EntityAttributes>): String
 
     suspend fun performAction(integrationRepository: IntegrationRepository, action: ControlAction): Boolean
 }

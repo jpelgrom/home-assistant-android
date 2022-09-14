@@ -33,17 +33,14 @@ object EntityExt {
 val <T> Entity<T>.domain: String
     get() = this.entityId.split(".")[0]
 
-fun <T> Entity<T>.getCoverPosition(): EntityPosition? {
+fun Entity<CoverAttributes>.getCoverPosition(): EntityPosition? {
     // https://github.com/home-assistant/frontend/blob/dev/src/dialogs/more-info/controls/more-info-cover.ts#L33
     return try {
-        if (
-            domain != "cover" ||
-            (attributes as Map<*, *>)["current_position"] == null
-        ) return null
+        if (domain != "cover" || attributes.currentPosition == null) return null
 
         val minValue = 0f
         val maxValue = 100f
-        val currentValue = (attributes["current_position"] as? Number)?.toFloat() ?: 0f
+        val currentValue = attributes.currentPosition.toFloat()
 
         EntityPosition(
             value = currentValue.coerceAtLeast(minValue).coerceAtMost(maxValue),
@@ -56,24 +53,25 @@ fun <T> Entity<T>.getCoverPosition(): EntityPosition? {
     }
 }
 
-fun <T> Entity<T>.supportsFanSetSpeed(): Boolean {
+fun Entity<FanAttributes>.supportsFanSetSpeed(): Boolean {
     return try {
         if (domain != "fan") return false
-        ((attributes as Map<*, *>)["supported_features"] as Int) and EntityExt.FAN_SUPPORT_SET_SPEED == EntityExt.FAN_SUPPORT_SET_SPEED
+        attributes.supportedFeatures != null &&
+            attributes.supportedFeatures and EntityExt.FAN_SUPPORT_SET_SPEED == EntityExt.FAN_SUPPORT_SET_SPEED
     } catch (e: Exception) {
         Log.e(EntityExt.TAG, "Unable to get supportsFanSetSpeed", e)
         false
     }
 }
 
-fun <T> Entity<T>.getFanSpeed(): EntityPosition? {
+fun Entity<FanAttributes>.getFanSpeed(): EntityPosition? {
     // https://github.com/home-assistant/frontend/blob/dev/src/dialogs/more-info/controls/more-info-fan.js#L48
     return try {
         if (!supportsFanSetSpeed()) return null
 
         val minValue = 0f
         val maxValue = 100f
-        val currentValue = ((attributes as Map<*, *>)["percentage"] as? Number)?.toFloat() ?: 0f
+        val currentValue = attributes.percentage?.toFloat() ?: 0f
 
         EntityPosition(
             value = currentValue.coerceAtLeast(minValue).coerceAtMost(maxValue),
@@ -86,7 +84,7 @@ fun <T> Entity<T>.getFanSpeed(): EntityPosition? {
     }
 }
 
-fun <T> Entity<T>.getFanSteps(): Int? {
+fun Entity<FanAttributes>.getFanSteps(): Int? {
     return try {
         if (!supportsFanSetSpeed()) return null
 
@@ -97,31 +95,34 @@ fun <T> Entity<T>.getFanSteps(): Int? {
             return calculateNumStep(percentageStep * 2)
         }
 
-        return calculateNumStep(((attributes as Map<*, *>)["percentage_step"] as? Double)?.toDouble() ?: 1.0) - 1
+        return calculateNumStep(attributes.percentageStep ?: 1.0) - 1
     } catch (e: Exception) {
         Log.e(EntityExt.TAG, "Unable to get getFanSteps")
         null
     }
 }
 
-fun <T> Entity<T>.supportsLightBrightness(): Boolean {
+fun Entity<LightAttributes>.supportsLightBrightness(): Boolean {
     return try {
         if (domain != "light") return false
 
         // On HA Core 2021.5 and later brightness detection has changed
         // to simplify things in the app lets use both methods for now
-        val supportedColorModes = (attributes as Map<*, *>)["supported_color_modes"] as? List<String>
         val supportsBrightness =
-            if (supportedColorModes == null) false else (supportedColorModes - EntityExt.LIGHT_MODE_NO_BRIGHTNESS_SUPPORT).isNotEmpty()
-        val supportedFeatures = attributes["supported_features"] as Int
-        supportsBrightness || (supportedFeatures and EntityExt.LIGHT_SUPPORT_BRIGHTNESS_DEPR == EntityExt.LIGHT_SUPPORT_BRIGHTNESS_DEPR)
+            if (attributes.supportedColorModes == null) false
+            else (attributes.supportedColorModes - EntityExt.LIGHT_MODE_NO_BRIGHTNESS_SUPPORT).isNotEmpty()
+        supportsBrightness ||
+            (
+                attributes.supportedFeatures != null &&
+                    attributes.supportedFeatures and EntityExt.LIGHT_SUPPORT_BRIGHTNESS_DEPR == EntityExt.LIGHT_SUPPORT_BRIGHTNESS_DEPR
+                )
     } catch (e: Exception) {
         Log.e(EntityExt.TAG, "Unable to get supportsLightBrightness", e)
         false
     }
 }
 
-fun <T> Entity<T>.getLightBrightness(): EntityPosition? {
+fun Entity<LightAttributes>.getLightBrightness(): EntityPosition? {
     // https://github.com/home-assistant/frontend/blob/dev/src/dialogs/more-info/controls/more-info-light.ts#L90
     return try {
         if (!supportsLightBrightness()) return null
@@ -131,7 +132,7 @@ fun <T> Entity<T>.getLightBrightness(): EntityPosition? {
                 val minValue = 0f
                 val maxValue = 100f
                 val currentValue =
-                    ((attributes as Map<*, *>)["brightness"] as? Number)?.toFloat()?.div(255f)?.times(100)
+                    attributes.brightness?.toFloat()?.div(255f)?.times(100)
                         ?: 0f
 
                 EntityPosition(
@@ -148,28 +149,30 @@ fun <T> Entity<T>.getLightBrightness(): EntityPosition? {
     }
 }
 
-fun <T> Entity<T>.supportsLightColorTemperature(): Boolean {
+fun Entity<LightAttributes>.supportsLightColorTemperature(): Boolean {
     return try {
         if (domain != "light") return false
 
-        val supportedColorModes = (attributes as Map<*, *>)["supported_color_modes"] as? List<String>
-        val supportsColorTemp = supportedColorModes?.contains(EntityExt.LIGHT_MODE_COLOR_TEMP) ?: false
-        val supportedFeatures = attributes["supported_features"] as Int
-        supportsColorTemp || (supportedFeatures and EntityExt.LIGHT_SUPPORT_COLOR_TEMP_DEPR == EntityExt.LIGHT_SUPPORT_COLOR_TEMP_DEPR)
+        val supportsColorTemp = attributes.supportedColorModes?.contains(EntityExt.LIGHT_MODE_COLOR_TEMP) ?: false
+        supportsColorTemp ||
+            (
+                attributes.supportedFeatures != null &&
+                    attributes.supportedFeatures and EntityExt.LIGHT_SUPPORT_COLOR_TEMP_DEPR == EntityExt.LIGHT_SUPPORT_COLOR_TEMP_DEPR
+                )
     } catch (e: Exception) {
         Log.e(EntityExt.TAG, "Unable to get supportsLightColorTemperature", e)
         false
     }
 }
 
-fun <T> Entity<T>.getLightColor(): Int? {
+fun Entity<LightAttributes>.getLightColor(): Int? {
     // https://github.com/home-assistant/frontend/blob/dev/src/panels/lovelace/cards/hui-light-card.ts#L243
     return try {
         if (domain != "light") return null
 
         when {
-            state != "off" && (attributes as Map<*, *>)["rgb_color"] != null -> {
-                val (r, g, b) = (attributes["rgb_color"] as List<Int>)
+            state != "off" && attributes.rgbColor != null -> {
+                val (r, g, b) = attributes.rgbColor
                 Color.rgb(r, g, b)
             }
             else -> null

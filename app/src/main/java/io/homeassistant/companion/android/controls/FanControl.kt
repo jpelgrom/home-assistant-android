@@ -12,23 +12,21 @@ import android.service.controls.templates.RangeTemplate
 import android.service.controls.templates.ToggleRangeTemplate
 import android.service.controls.templates.ToggleTemplate
 import androidx.annotation.RequiresApi
-import io.homeassistant.companion.android.common.data.integration.Entity
-import io.homeassistant.companion.android.common.data.integration.IntegrationRepository
-import io.homeassistant.companion.android.common.data.integration.getFanSpeed
-import io.homeassistant.companion.android.common.data.integration.supportsFanSetSpeed
+import io.homeassistant.companion.android.common.data.integration.*
 import io.homeassistant.companion.android.common.data.websocket.impl.entities.AreaRegistryResponse
 import io.homeassistant.companion.android.common.R as commonR
 
+@Suppress("UNCHECKED_CAST")
 @RequiresApi(Build.VERSION_CODES.R)
 object FanControl : HaControl {
     override fun provideControlFeatures(
         context: Context,
         control: Control.StatefulBuilder,
-        entity: Entity<Map<String, Any>>,
+        entity: Entity<EntityAttributes>,
         area: AreaRegistryResponse?,
         baseUrl: String?
     ): Control.StatefulBuilder {
-        if (entity.supportsFanSetSpeed()) {
+        if ((entity as Entity<FanAttributes>).supportsFanSetSpeed()) {
             val position = entity.getFanSpeed()
             control.setControlTemplate(
                 ToggleRangeTemplate(
@@ -59,10 +57,10 @@ object FanControl : HaControl {
         return control
     }
 
-    override fun getDeviceType(entity: Entity<Map<String, Any>>): Int =
+    override fun getDeviceType(entity: Entity<EntityAttributes>): Int =
         DeviceTypes.TYPE_FAN
 
-    override fun getDomainString(context: Context, entity: Entity<Map<String, Any>>): String =
+    override fun getDomainString(context: Context, entity: Entity<EntityAttributes>): String =
         context.getString(commonR.string.domain_fan)
 
     override suspend fun performAction(

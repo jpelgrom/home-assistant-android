@@ -10,6 +10,7 @@ import androidx.wear.compose.material.ChipDefaults
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.items
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
 import io.homeassistant.companion.android.theme.WearAppTheme
 import io.homeassistant.companion.android.util.playPreviewEntityScene1
 import io.homeassistant.companion.android.util.playPreviewEntityScene2
@@ -24,9 +25,9 @@ import io.homeassistant.companion.android.common.R as commonR
 
 @Composable
 fun EntityViewList(
-    entityLists: Map<String, List<Entity<*>>>,
+    entityLists: Map<String, List<Entity<EntityAttributes>>>,
     entityListsOrder: List<String>,
-    entityListFilter: (Entity<*>) -> Boolean,
+    entityListFilter: (Entity<EntityAttributes>) -> Boolean,
     onEntityClicked: (String, String) -> Unit,
     onEntityLongClicked: (String) -> Unit,
     isHapticEnabled: Boolean,

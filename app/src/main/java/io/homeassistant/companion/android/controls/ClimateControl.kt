@@ -10,7 +10,9 @@ import android.service.controls.actions.ModeAction
 import android.service.controls.templates.RangeTemplate
 import android.service.controls.templates.TemperatureControlTemplate
 import androidx.annotation.RequiresApi
+import io.homeassistant.companion.android.common.data.integration.ClimateAttributes
 import io.homeassistant.companion.android.common.data.integration.Entity
+import io.homeassistant.companion.android.common.data.integration.EntityAttributes
 import io.homeassistant.companion.android.common.data.integration.IntegrationRepository
 import io.homeassistant.companion.android.common.data.websocket.impl.entities.AreaRegistryResponse
 import io.homeassistant.companion.android.common.R as commonR
@@ -35,7 +37,7 @@ object ClimateControl : HaControl {
     override fun provideControlFeatures(
         context: Context,
         control: Control.StatefulBuilder,
-        entity: Entity<Map<String, Any>>,
+        entity: Entity<EntityAttributes>,
         area: AreaRegistryResponse?,
         baseUrl: String?
     ): Control.StatefulBuilder {
@@ -52,10 +54,10 @@ object ClimateControl : HaControl {
                 else -> entity.state
             }
         )
-        val minValue = (entity.attributes["min_temp"] as? Number)?.toFloat() ?: 0f
-        val maxValue = (entity.attributes["max_temp"] as? Number)?.toFloat() ?: 100f
-        var currentValue = (entity.attributes["temperature"] as? Number)?.toFloat() ?: (
-            entity.attributes["current_temperature"] as? Number
+        val minValue = (entity.attributes as ClimateAttributes).minTemp?.toFloat() ?: 0f
+        val maxValue = (entity.attributes as ClimateAttributes).maxTemp?.toFloat() ?: 100f
+        var currentValue = (entity.attributes as ClimateAttributes).temperature?.toFloat() ?: (
+            (entity.attributes as ClimateAttributes).currentTemperature
             )?.toFloat() ?: 0f
         // Ensure the current value is never lower than the minimum or higher than the maximum
         if (currentValue < minValue)
@@ -63,8 +65,8 @@ object ClimateControl : HaControl {
         if (currentValue > maxValue)
             currentValue = maxValue
 
-        val temperatureUnit = entity.attributes["temperature_unit"] ?: ""
-        val temperatureStepSize = (entity.attributes["target_temperature_step"] as? Number)?.toFloat()
+        val temperatureUnit = (entity.attributes as ClimateAttributes).temperatureUnit ?: ""
+        val temperatureStepSize = (entity.attributes as ClimateAttributes).targetTemperatureStep?.toFloat()
             ?: when (temperatureUnit) {
                 "°C" -> 0.5f
                 else -> 1f
@@ -80,7 +82,7 @@ object ClimateControl : HaControl {
         )
         if (entityShouldBePresentedAsThermostat(entity)) {
             var modesFlag = 0
-            (entity.attributes["hvac_modes"] as? List<String>)?.forEach {
+            (entity.attributes as ClimateAttributes).hvacModes?.forEach {
                 modesFlag = modesFlag or temperatureControlModeFlags[it]!!
             }
             control.setControlTemplate(
@@ -99,13 +101,13 @@ object ClimateControl : HaControl {
         return control
     }
 
-    override fun getDeviceType(entity: Entity<Map<String, Any>>): Int =
+    override fun getDeviceType(entity: Entity<EntityAttributes>): Int =
         if (entityShouldBePresentedAsThermostat(entity))
             DeviceTypes.TYPE_THERMOSTAT
         else
             DeviceTypes.TYPE_AC_HEATER
 
-    override fun getDomainString(context: Context, entity: Entity<Map<String, Any>>): String =
+    override fun getDomainString(context: Context, entity: Entity<EntityAttributes>): String =
         context.getString(commonR.string.domain_climate)
 
     override suspend fun performAction(
@@ -145,14 +147,18 @@ object ClimateControl : HaControl {
         }
     }
 
-    private fun entityShouldBePresentedAsThermostat(entity: Entity<Map<String, Any>>): Boolean {
+    private fun entityShouldBePresentedAsThermostat(entity: Entity<EntityAttributes>): Boolean {
         return temperatureControlModes.containsKey(entity.state) &&
-            ((entity.attributes["hvac_modes"] as? List<String>)?.isNotEmpty() == true) &&
-            ((entity.attributes["hvac_modes"] as? List<String>)?.any { it == entity.state } == true) &&
-            ((entity.attributes["hvac_modes"] as? List<String>)?.all { temperatureControlModes.containsKey(it) } == true) &&
+            ((entity.attributes as ClimateAttributes).hvacModes?.isNotEmpty() == true) &&
+            ((entity.attributes as ClimateAttributes).hvacModes?.any { it == entity.state } == true) &&
+            ((entity.attributes as ClimateAttributes).hvacModes?.all { temperatureControlModes.containsKey(it) } == true) &&
             (
-                ((entity.attributes["supported_features"] as Int) and SUPPORT_TARGET_TEMPERATURE == SUPPORT_TARGET_TEMPERATURE) ||
-                    ((entity.attributes["supported_features"] as Int) and SUPPORT_TARGET_TEMPERATURE_RANGE == SUPPORT_TARGET_TEMPERATURE_RANGE)
+                (entity.attributes as ClimateAttributes).supportedFeatures != null &&
+                    (
+                        ((entity.attributes as ClimateAttributes).supportedFeatures!! and SUPPORT_TARGET_TEMPERATURE == SUPPORT_TARGET_TEMPERATURE) ||
+                            ((entity.attributes as ClimateAttributes).supportedFeatures!! and SUPPORT_TARGET_TEMPERATURE_RANGE == SUPPORT_TARGET_TEMPERATURE_RANGE)
+                        )
+
                 )
     }
 }

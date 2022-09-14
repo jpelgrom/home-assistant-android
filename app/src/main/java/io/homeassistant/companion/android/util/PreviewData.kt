@@ -1,5 +1,6 @@
 package io.homeassistant.companion.android.util
 
+import io.homeassistant.companion.android.common.data.integration.DefaultEntityAttributes
 import io.homeassistant.companion.android.common.data.integration.Entity
 import io.homeassistant.companion.android.database.notification.NotificationItem
 import java.util.Calendar
@@ -8,9 +9,9 @@ val notificationItem = NotificationItem(1, 1636389288682, "testing", "{\"message
 
 val wearDeviceName = "Device Name"
 
-val attributes: Map<*, *> = mapOf(
-    "friendly_name" to "Testing",
-    "icon" to "mdi:cellphone"
+val attributes = DefaultEntityAttributes(
+    friendlyName = "Testing",
+    icon = "mdi:cellphone"
 )
 
 private val calendar: Calendar = Calendar.getInstance()
