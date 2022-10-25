@@ -46,7 +46,7 @@ class SensorReceiver : SensorReceiverBase() {
             LocationSensorManager(),
             MobileDataManager(),
             NetworkSensorManager(),
-            NextAlarmManager(),
+            TheNextAlarmManager(),
             NotificationSensorManager(),
             PhoneStateSensorManager(),
             PowerSensorManager(),
@@ -66,7 +66,7 @@ class SensorReceiver : SensorReceiverBase() {
     // Suppress Lint because we only register for the receiver if the android version matches the intent
     @SuppressLint("InlinedApi")
     override val skippableActions = mapOf(
-        "android.app.action.NEXT_ALARM_CLOCK_CHANGED" to NextAlarmManager.nextAlarm.id,
+        "android.app.action.NEXT_ALARM_CLOCK_CHANGED" to TheNextAlarmManager.nextAlarm.id,
         "android.bluetooth.device.action.ACL_CONNECTED" to BluetoothSensorManager.bluetoothConnection.id,
         "android.bluetooth.device.action.ACL_DISCONNECTED" to BluetoothSensorManager.bluetoothConnection.id,
         "com.oculus.intent.action.MOUNT_STATE_CHANGED" to QuestSensorManager.headsetMounted.id,
