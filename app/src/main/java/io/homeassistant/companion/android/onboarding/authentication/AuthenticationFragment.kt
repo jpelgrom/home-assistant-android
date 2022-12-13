@@ -18,6 +18,7 @@ import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.Fragment
@@ -42,7 +43,7 @@ class AuthenticationFragment : Fragment() {
 
     companion object {
         private const val TAG = "AuthenticationFragment"
-        private const val AUTH_CALLBACK = "homeassistant://auth-callback"
+        const val AUTH_CALLBACK = "homeassistant://auth-callback"
     }
 
     private val viewModel by activityViewModels<OnboardingViewModel>()
@@ -61,6 +62,14 @@ class AuthenticationFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        val url = buildAuthUrl(viewModel.manualUrl.value)
+        val builder = CustomTabsIntent.Builder()
+        val customTabsIntent: CustomTabsIntent = builder.build()
+        customTabsIntent.launchUrl(requireContext(), Uri.parse(url))
+
+        /*if (BuildConfig.DEBUG) {
+            WebView.setWebContentsDebuggingEnabled(true)
+        }
         return ComposeView(requireContext()).apply {
             setContent {
                 MdcTheme {
@@ -158,7 +167,9 @@ class AuthenticationFragment : Fragment() {
                     })
                 }
             }
-        }
+        }*/
+
+        return ComposeView(requireContext())
     }
 
     private fun buildAuthUrl(base: String): String {

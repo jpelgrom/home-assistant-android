@@ -1,7 +1,9 @@
 package io.homeassistant.companion.android.onboarding
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
@@ -13,6 +15,7 @@ import io.homeassistant.companion.android.BuildConfig
 import io.homeassistant.companion.android.R
 import io.homeassistant.companion.android.onboarding.authentication.AuthenticationFragment
 import io.homeassistant.companion.android.onboarding.discovery.DiscoveryFragment
+import io.homeassistant.companion.android.onboarding.integration.MobileAppIntegrationFragment
 import io.homeassistant.companion.android.onboarding.manual.ManualSetupFragment
 import io.homeassistant.companion.android.onboarding.welcome.WelcomeFragment
 
@@ -93,5 +96,24 @@ class OnboardingActivity : AppCompatActivity() {
         }
 
         return super.dispatchKeyEvent(event)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        intent?.let {
+            it.data?.let { uri ->
+                Log.d("OnboardingActivity", "Received new intent with data $uri")
+                Log.d("OnboardingActivity", uri.toString().startsWith(AuthenticationFragment.AUTH_CALLBACK).toString())
+                if (uri.toString().startsWith(AuthenticationFragment.AUTH_CALLBACK)) {
+                    viewModel.registerAuthCode(uri.getQueryParameter("code")!!)
+                    supportFragmentManager
+                        .beginTransaction()
+                        .replace(R.id.content, MobileAppIntegrationFragment::class.java, null)
+                        .addToBackStack(null)
+                        .commit()
+                }
+            }
+        }
     }
 }
