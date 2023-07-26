@@ -11,14 +11,14 @@ import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.material.MaterialTheme
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.core.view.WindowCompat
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.google.accompanist.themeadapter.material.MdcTheme
+import com.google.accompanist.themeadapter.material3.Mdc3Theme
 import dagger.hilt.android.AndroidEntryPoint
 import io.homeassistant.companion.android.BaseActivity
 import io.homeassistant.companion.android.assist.ui.AssistSheetView
@@ -96,9 +96,9 @@ class AssistActivity : BaseActivity() {
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
-            MdcTheme {
+            Mdc3Theme {
                 val systemUiController = rememberSystemUiController()
-                val useDarkIcons = MaterialTheme.colors.isLight
+                val useDarkIcons = isSystemInDarkTheme()
                 SideEffect {
                     systemUiController.setSystemBarsColor(Color.Transparent, darkIcons = useDarkIcons)
                 }

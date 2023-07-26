@@ -1,13 +1,13 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Theme.LaunchScreen.Base is necessary because on higher API levels it will be overridden to paint the status or navigation bar -->
-    <style name="Theme.LaunchScreen.Base" parent="Theme.MaterialComponents.DayNight.NoActionBar"/>
+    <style name="Theme.LaunchScreen.Base" parent="Theme.Material3.DayNight.NoActionBar"/>
 
     <style name="Theme.LaunchScreen" parent="Theme.LaunchScreen.Base">
         <item name="android:background">@drawable/launch_screen_background</item>
         <item name="alertDialogTheme">@style/Theme.HomeAssistant.Dialog.Alert.Launch</item>
     </style>
 
-    <style name="Theme.HomeAssistant" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="Theme.HomeAssistant" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
@@ -32,33 +32,33 @@
         <item name="android:backgroundDimAmount">0.1</item>
     </style>
 
-    <style name="TextAppearance.HomeAssistant.Headline" parent="TextAppearance.MaterialComponents.Headline1">
+    <style name="TextAppearance.HomeAssistant.Headline" parent="TextAppearance.Material3.DisplaySmall">
         <item name="android:textSize">20sp</item>
         <item name="android:textColor">@color/colorHeadline1</item>
     </style>
 
-    <style name="TextAppearance.HomeAssistant.Title" parent="TextAppearance.MaterialComponents.Headline2">
+    <style name="TextAppearance.HomeAssistant.Title" parent="TextAppearance.Material3.HeadlineLarge">
         <item name="android:textSize">18sp</item>
         <item name="android:textColor">@color/colorHeadline2</item>
     </style>
 
-    <style name="TextAppearance.HomeAssistant.Medium" parent="TextAppearance.MaterialComponents.Headline3">
+    <style name="TextAppearance.HomeAssistant.Medium" parent="TextAppearance.Material3.HeadlineMedium">
         <item name="android:textSize">16sp</item>
     </style>
 
-    <style name="Widget.HomeAssistant.Button.Colored" parent="Widget.MaterialComponents.Button">
+    <style name="Widget.HomeAssistant.Button.Colored" parent="Widget.Material3.Button">
         <item name="android:textColor">@color/colorOnPrimary</item>
     </style>
 
-    <style name="Widget.HomeAssistant.Button.Outlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
+    <style name="Widget.HomeAssistant.Button.Outlined" parent="Widget.Material3.Button.OutlinedButton">
         <item name="android:textColor">@color/colorPrimary</item>
     </style>
 
-    <style name="Theme.HomeAssistant.PopupTheme" parent="ThemeOverlay.MaterialComponents.Light">
+    <style name="Theme.HomeAssistant.PopupTheme" parent="ThemeOverlay.Material3.Light">
         <item name="android:background">@color/colorActionBarPopupBackground</item>
     </style>
 
-    <style name="ThemeOverlay.HomeAssistant.ActionBar" parent="ThemeOverlay.MaterialComponents.ActionBar">
+    <style name="ThemeOverlay.HomeAssistant.ActionBar" parent="ThemeOverlay.Material3.ActionBar">
         <item name="android:background">@color/colorActionBar</item>
         <item name="android:textColorPrimary">@color/colorOnPrimary</item>
         <item name="colorControlNormal">@color/colorOnPrimary</item>
@@ -67,11 +67,11 @@
 
     <style name="ThemeOverlay.HomeAssistant.BottomSheetDialog" parent="ThemeOverlay.HomeAssistant.BottomSheetDialog.Base"/>
 
-    <style name="ThemeOverlay.HomeAssistant.BottomSheetDialog.Base" parent="ThemeOverlay.MaterialComponents.BottomSheetDialog">
+    <style name="ThemeOverlay.HomeAssistant.BottomSheetDialog.Base" parent="ThemeOverlay.Material3.BottomSheetDialog">
         <item name="android:backgroundTint">@android:color/transparent</item>
     </style>
 
-    <style name="ThemeOverlay.HomeAssistant.ConfigActionBar" parent="ThemeOverlay.MaterialComponents.ActionBar">
+    <style name="ThemeOverlay.HomeAssistant.ConfigActionBar" parent="ThemeOverlay.Material3.ActionBar">
         <item name="android:background">@color/colorBackground</item>
         <item name="android:textColorPrimary">@color/colorOnBackground</item>
         <item name="colorControlNormal">@color/colorOnBackground</item>
@@ -82,7 +82,7 @@
         <item name="android:background">@null</item>
     </style>
 
-    <style name="Theme.HomeAssistant.Dialog.Alert" parent="Theme.MaterialComponents.Light.Dialog.Alert">
+    <style name="Theme.HomeAssistant.Dialog.Alert" parent="Theme.Material3.Light.Dialog.Alert">
         <item name="android:textColor">@color/colorDialogTitle</item>
         <item name="buttonBarPositiveButtonStyle">@style/Alert.Button.Positive</item>
         <item name="buttonBarNegativeButtonStyle">@style/Alert.Button.Negative</item>
@@ -101,7 +101,7 @@
         <item name="dimenWidgetCornerRadius">@dimen/widget_corner_radius</item>
     </style>
 
-    <style name="Authentication_Dialog" parent="Theme.MaterialComponents.Light.Dialog">
+    <style name="Authentication_Dialog" parent="Theme.Material3.Light.Dialog">
         <item name="android:textColor">@color/colorDialogTitle</item>
         <item name="buttonBarPositiveButtonStyle">@style/Alert.Button.Positive</item>
         <item name="buttonBarNegativeButtonStyle">@style/Alert.Button.Negative</item>
@@ -111,19 +111,19 @@
         <item name="android:textColorPrimary">@color/colorDialogMessage</item>
     </style>
 
-    <style name="Alert.Button.Neutral" parent="Widget.MaterialComponents.Button.TextButton">
+    <style name="Alert.Button.Neutral" parent="Widget.Material3.Button.TextButton">
         <item name="android:textColor">@color/colorAccent</item>
     </style>
 
-    <style name="Alert.Button.Positive" parent="Widget.MaterialComponents.Button.TextButton">
+    <style name="Alert.Button.Positive" parent="Widget.Material3.Button.TextButton">
         <item name="android:textColor">@color/colorAccent</item>
     </style>
 
-    <style name="Alert.Button.Negative" parent="Widget.MaterialComponents.Button.TextButton">
+    <style name="Alert.Button.Negative" parent="Widget.Material3.Button.TextButton">
         <item name="android:textColor">@color/colorAccent</item>
     </style>
 
-    <style name="Theme.Transparent" parent="Theme.MaterialComponents.NoActionBar">
+    <style name="Theme.Transparent" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowContentOverlay">@null</item>

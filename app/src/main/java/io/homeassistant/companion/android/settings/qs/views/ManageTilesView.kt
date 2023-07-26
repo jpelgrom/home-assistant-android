@@ -9,18 +9,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.Divider
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Switch
-import androidx.compose.material.SwitchDefaults
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.TextField
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -51,16 +52,16 @@ fun ManageTilesView(
     val scrollState = rememberScrollState()
     var expandedTile by remember { mutableStateOf(false) }
 
-    val scaffoldState = rememberScaffoldState()
+    val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect("snackbar") {
         viewModel.tileInfoSnackbar.onEach {
             if (it != 0) {
-                scaffoldState.snackbarHostState.showSnackbar(context.getString(it))
+                snackbarHostState.showSnackbar(context.getString(it))
             }
         }.launchIn(this)
     }
 
-    Scaffold(scaffoldState = scaffoldState) { contentPadding ->
+    Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) { contentPadding ->
         Box(
             modifier = Modifier
                 .padding(contentPadding)
@@ -80,12 +81,13 @@ fun ManageTilesView(
 
                         DropdownMenu(expanded = expandedTile, onDismissRequest = { expandedTile = false }) {
                             for ((index, slot) in viewModel.slots.withIndex()) {
-                                DropdownMenuItem(onClick = {
-                                    viewModel.selectTile(index)
-                                    expandedTile = false
-                                }) {
-                                    Text(slot.name)
-                                }
+                                DropdownMenuItem(
+                                    text = { Text(slot.name) },
+                                    onClick = {
+                                        viewModel.selectTile(index)
+                                        expandedTile = false
+                                    }
+                                )
                             }
                         }
                     }

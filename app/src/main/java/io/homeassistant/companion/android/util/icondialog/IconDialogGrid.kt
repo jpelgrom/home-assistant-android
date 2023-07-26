@@ -6,9 +6,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -20,7 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.themeadapter.material.MdcTheme
+import com.google.accompanist.themeadapter.material3.Mdc3Theme
 import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.ITypeface
@@ -36,7 +36,7 @@ import kotlinx.coroutines.withContext
 @Composable
 fun IconDialogGrid(
     icons: List<IIcon>,
-    tint: Color = MaterialTheme.colors.onSurface,
+    tint: Color = MaterialTheme.colorScheme.onSurface,
     onClick: (IIcon) -> Unit
 ) {
     LazyVerticalGrid(
@@ -68,7 +68,7 @@ fun IconDialogGrid(
     typeface: ITypeface,
     searchQuery: String,
     iconFilter: IconFilter = DefaultIconFilter(),
-    tint: Color = MaterialTheme.colors.onSurface,
+    tint: Color = MaterialTheme.colorScheme.onSurface,
     onClick: (IIcon) -> Unit
 ) {
     var icons by remember { mutableStateOf<List<IIcon>>(emptyList()) }
@@ -82,7 +82,7 @@ fun IconDialogGrid(
 @Preview
 @Composable
 private fun IconDialogGridPreview() {
-    MdcTheme {
+    Mdc3Theme {
         Surface(
             modifier = Modifier
                 .width(480.dp)

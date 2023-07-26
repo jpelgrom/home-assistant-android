@@ -13,12 +13,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -89,12 +89,15 @@ fun SettingsWearTemplateTile(
                     ) {
                         val options = listOf(0, 60, 2 * 60, 5 * 60, 10 * 60, 15 * 60, 30 * 60, 60 * 60, 5 * 60 * 60, 10 * 60 * 60, 24 * 60 * 60)
                         for (option in options) {
-                            DropdownMenuItem(onClick = {
-                                onRefreshIntervalChanged(option)
-                                dropdownExpanded = false
-                            }) {
-                                Text(IntervalToString(LocalContext.current, option))
-                            }
+                            DropdownMenuItem(
+                                text = {
+                                    Text(IntervalToString(LocalContext.current, option))
+                                },
+                                onClick = {
+                                    onRefreshIntervalChanged(option)
+                                    dropdownExpanded = false
+                                }
+                            )
                         }
                     }
                 }

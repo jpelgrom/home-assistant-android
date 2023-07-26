@@ -11,7 +11,7 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
-import com.google.accompanist.themeadapter.material.MdcTheme
+import com.google.accompanist.themeadapter.material3.Mdc3Theme
 import dagger.hilt.android.AndroidEntryPoint
 import io.homeassistant.companion.android.BaseActivity
 import io.homeassistant.companion.android.nfc.views.LoadNfcView
@@ -62,7 +62,7 @@ class NfcSetupActivity : BaseActivity() {
         }
 
         setContent {
-            MdcTheme {
+            Mdc3Theme {
                 LoadNfcView(
                     viewModel = viewModel,
                     startDestination = if (simpleWrite) NAV_WRITE else NAV_WELCOME,

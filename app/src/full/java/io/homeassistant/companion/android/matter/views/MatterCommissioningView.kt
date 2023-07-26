@@ -14,13 +14,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ProvideTextStyle
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,7 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.themeadapter.material.MdcTheme
+import com.google.accompanist.themeadapter.material3.Mdc3Theme
 import io.homeassistant.companion.android.R
 import io.homeassistant.companion.android.database.server.Server
 import io.homeassistant.companion.android.database.server.ServerConnectionInfo
@@ -74,7 +74,7 @@ fun MatterCommissioningView(
         ) {
             MatterCommissioningViewHeader()
 
-            ProvideTextStyle(MaterialTheme.typography.body1) {
+            ProvideTextStyle(MaterialTheme.typography.bodyLarge) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -203,7 +203,7 @@ fun MatterCommissioningViewHeader() {
         )
         Text(
             text = stringResource(commonR.string.matter_shared_title),
-            style = MaterialTheme.typography.h5,
+            style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .padding(vertical = 16.dp)
@@ -217,7 +217,7 @@ fun MatterCommissioningViewHeader() {
 fun PreviewMatterCommissioningView(
     @PreviewParameter(MatterCommissioningViewPreviewStates::class) step: CommissioningFlowStep
 ) {
-    MdcTheme {
+    Mdc3Theme {
         MatterCommissioningView(
             step = step,
             deviceName = "Manufacturer Matter Light",

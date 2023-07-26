@@ -4,9 +4,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -60,16 +61,16 @@ fun LoadWearFavoritesSettings(
         }
     }
 
-    val scaffoldState = rememberScaffoldState()
+    val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect("snackbar") {
         events.onEach { message ->
-            scaffoldState.snackbarHostState.currentSnackbarData?.dismiss() // in case of rapid-fire events
-            scaffoldState.snackbarHostState.showSnackbar(message)
+            snackbarHostState.currentSnackbarData?.dismiss() // in case of rapid-fire events
+            snackbarHostState.showSnackbar(message)
         }.launchIn(this)
     }
 
     Scaffold(
-        scaffoldState = scaffoldState,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             SettingsWearTopAppBar(
                 title = { Text(stringResource(commonR.string.wear_favorite_entities)) },

@@ -10,7 +10,7 @@ import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.google.accompanist.themeadapter.material.MdcTheme
+import com.google.accompanist.themeadapter.material3.Mdc3Theme
 import dagger.hilt.android.AndroidEntryPoint
 import io.homeassistant.companion.android.R
 import io.homeassistant.companion.android.settings.ssid.views.SsidView
@@ -47,7 +47,7 @@ class SsidFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                MdcTheme {
+                Mdc3Theme {
                     SsidView(
                         wifiSsids = viewModel.wifiSsids,
                         prioritizeInternal = viewModel.prioritizeInternal,

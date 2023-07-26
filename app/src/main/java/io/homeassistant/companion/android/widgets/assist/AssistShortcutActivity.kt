@@ -8,7 +8,7 @@ import androidx.activity.viewModels
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
-import com.google.accompanist.themeadapter.material.MdcTheme
+import com.google.accompanist.themeadapter.material3.Mdc3Theme
 import dagger.hilt.android.AndroidEntryPoint
 import io.homeassistant.companion.android.BaseActivity
 import io.homeassistant.companion.android.R
@@ -28,7 +28,7 @@ class AssistShortcutActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            MdcTheme {
+            Mdc3Theme {
                 AssistShortcutView(
                     selectedServerId = viewModel.serverId,
                     servers = viewModel.servers,

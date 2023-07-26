@@ -4,19 +4,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ExposedDropdownMenuBox
-import androidx.compose.material.ExposedDropdownMenuDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -37,7 +36,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import io.homeassistant.companion.android.common.R as commonR
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SingleEntityPicker(
     entities: List<Entity<*>>,
@@ -119,6 +118,24 @@ fun SingleEntityPicker(
             ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 list.forEach {
                     DropdownMenuItem(
+                        text = {
+                            Column {
+                                Text(
+                                    text = it.friendlyName,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant) {
+                                    Text(
+                                        text = it.entityId,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                        },
                         onClick = {
                             val setInput = onEntitySelected(it.entityId)
                             inputValue = if (setInput) it.friendlyName else ""
@@ -126,33 +143,20 @@ fun SingleEntityPicker(
                             focusManager.clearFocus()
                         },
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-                    ) {
-                        Column {
-                            Text(
-                                text = it.friendlyName,
-                                style = MaterialTheme.typography.body1,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-                                Text(
-                                    text = it.entityId,
-                                    style = MaterialTheme.typography.body2,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                        }
-                    }
+                    )
                 }
                 if (listTooLarge) {
-                    DropdownMenuItem(onClick = { /* No-op */ }, enabled = false) {
-                        Text(
-                            text = stringResource(commonR.string.search_refine_for_more),
-                            style = MaterialTheme.typography.body2,
-                            fontStyle = FontStyle.Italic
-                        )
-                    }
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = stringResource(commonR.string.search_refine_for_more),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontStyle = FontStyle.Italic
+                            )
+                        },
+                        onClick = { /* No-op */ },
+                        enabled = false
+                    )
                 }
             }
         }

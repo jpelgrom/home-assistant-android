@@ -15,12 +15,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Button
-import androidx.compose.material.ExtendedFloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Widgets
@@ -73,8 +73,8 @@ fun ManageWidgetsView(
     Scaffold(floatingActionButton = {
         if (viewModel.supportsAddingWidgets) {
             ExtendedFloatingActionButton(
-                backgroundColor = MaterialTheme.colors.primary,
-                contentColor = MaterialTheme.colors.onPrimary,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
                 icon = { Icon(Icons.Filled.Add, contentDescription = null) },
                 text = { Text(stringResource(R.string.add_widget)) },
                 onClick = { expandedAddWidget = true }
@@ -129,7 +129,7 @@ fun ManageWidgetsView(
                         )
                         Text(
                             text = stringResource(id = R.string.no_widgets),
-                            style = MaterialTheme.typography.h6,
+                            style = MaterialTheme.typography.titleLarge,
                             textAlign = TextAlign.Center,
                             modifier = Modifier
                                 .fillMaxWidth(0.7f)
@@ -227,7 +227,7 @@ private fun PopupWidgetRow(
         ) {
             Image(
                 asset = widgetType.widgetIcon,
-                colorFilter = ColorFilter.tint(MaterialTheme.colors.onSurface),
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
                 contentDescription = widgetLabel
             )
             Text(text = widgetLabel, modifier = Modifier.padding(start = 16.dp))

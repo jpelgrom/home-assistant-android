@@ -7,7 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.DialogFragment
-import com.google.accompanist.themeadapter.material.MdcTheme
+import com.google.accompanist.themeadapter.material3.Mdc3Theme
 import com.mikepenz.iconics.typeface.IIcon
 import kotlin.math.min
 
@@ -33,7 +33,7 @@ class IconDialogFragment(callback: (IIcon) -> Unit) : DialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         (view as ComposeView).setContent {
-            MdcTheme {
+            Mdc3Theme {
                 IconDialogContent(
                     onSelect = onSelect
                 )

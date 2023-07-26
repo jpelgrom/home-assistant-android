@@ -10,11 +10,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ProvideTextStyle
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -35,7 +35,7 @@ import io.homeassistant.companion.android.common.R as commonR
  *
  * @param onDismissRequest Action when the user dismisses the dialog by tapping outside it or pressing back
  * @param title Title for the dialog, provided text style will be [androidx.compose.material.Typography.h6].
- * @param content Content for the dialog, provided text style will be [androidx.compose.material.Typography.body1].
+ * @param content Content for the dialog, provided text style will be [androidx.compose.material.Typography.bodyLarge].
  * @param onCancel Action when the 'Cancel' button is pressed. Set to null to hide button.
  * @param onSave Action when the 'Save' button is pressed. Set to null to hide button.
  * @param contentPadding PaddingValues for the content. By default content will be padded to match the title and buttons.
@@ -55,7 +55,7 @@ fun MdcAlertDialog(
     Dialog(onDismissRequest = onDismissRequest) {
         Surface(
             shape = MaterialTheme.shapes.medium,
-            color = MaterialTheme.colors.surface
+            color = MaterialTheme.colorScheme.surface
         ) {
             Column(
                 modifier = Modifier.heightIn(max = configuration.screenHeightDp.dp - 16.dp)
@@ -65,7 +65,7 @@ fun MdcAlertDialog(
                         .padding(horizontal = 24.dp, vertical = 16.dp)
                         .fillMaxWidth()
                 ) {
-                    ProvideTextStyle(MaterialTheme.typography.h6, title)
+                    ProvideTextStyle(MaterialTheme.typography.titleLarge, title)
                 }
                 Box(
                     modifier = Modifier
@@ -73,7 +73,7 @@ fun MdcAlertDialog(
                         .fillMaxWidth()
                         .weight(weight = 1f, fill = false)
                 ) {
-                    ProvideTextStyle(MaterialTheme.typography.body1, content)
+                    ProvideTextStyle(MaterialTheme.typography.bodyLarge, content)
                 }
                 Row(
                     horizontalArrangement = Arrangement.End,

@@ -9,9 +9,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,7 +27,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.accompanist.themeadapter.material.MdcTheme
+import com.google.accompanist.themeadapter.material3.Mdc3Theme
 import io.homeassistant.companion.android.R
 import io.homeassistant.companion.android.common.R as commonR
 
@@ -68,7 +68,7 @@ fun WelcomeView(
             pushStringAnnotation("learn", "https://www.home-assistant.io")
             withStyle(
                 style = SpanStyle(
-                    color = MaterialTheme.colors.primary,
+                    color = MaterialTheme.colorScheme.primary,
                     textDecoration = TextDecoration.Underline
                 )
             ) {
@@ -103,7 +103,7 @@ fun WelcomeView(
 @Preview(showSystemUi = true)
 @Preview(showSystemUi = true, uiMode = UI_MODE_NIGHT_YES)
 private fun PreviewWelcome() {
-    MdcTheme {
+    Mdc3Theme {
         WelcomeView(onContinue = {})
     }
 }

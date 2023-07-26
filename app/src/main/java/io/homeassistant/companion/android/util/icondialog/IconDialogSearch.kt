@@ -1,11 +1,11 @@
 package io.homeassistant.companion.android.util.icondialog
 
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.tooling.preview.Preview
-import com.google.accompanist.themeadapter.material.MdcTheme
+import com.google.accompanist.themeadapter.material3.Mdc3Theme
 import io.homeassistant.companion.android.common.R
 
 @Composable
@@ -52,7 +52,7 @@ fun IconDialogSearch(
 @Preview
 @Composable
 private fun IconDialogSearchPreview() {
-    MdcTheme {
+    Mdc3Theme {
         Surface {
             IconDialogSearch(value = "account", onValueChange = {})
         }

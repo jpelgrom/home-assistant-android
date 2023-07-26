@@ -3,15 +3,18 @@ package io.homeassistant.companion.android.nfc.views
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.HelpOutline
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -29,6 +32,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import io.homeassistant.companion.android.common.R as commonR
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoadNfcView(
     viewModel: NfcViewModel,
@@ -53,17 +57,17 @@ fun LoadNfcView(
         }.launchIn(this)
     }
 
-    val scaffoldState = rememberScaffoldState()
+    val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect("snackbar") {
         viewModel.nfcResultSnackbar.onEach {
             if (it != 0) {
-                scaffoldState.snackbarHostState.showSnackbar(context.getString(it))
+                snackbarHostState.showSnackbar(context.getString(it))
             }
         }.launchIn(this)
     }
 
     Scaffold(
-        scaffoldState = scaffoldState,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(commonR.string.nfc_title_settings)) },
@@ -93,8 +97,9 @@ fun LoadNfcView(
                         )
                     }
                 },
-                backgroundColor = colorResource(commonR.color.colorBackground),
-                contentColor = colorResource(commonR.color.colorOnBackground)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = colorResource(id = commonR.color.colorBackground)
+                )
             )
         }
     ) { contentPadding ->

@@ -10,13 +10,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Switch
-import androidx.compose.material.SwitchDefaults
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.material.TopAppBar
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,6 +35,7 @@ import io.homeassistant.companion.android.util.compose.ExposedDropdownMenu
 import io.homeassistant.companion.android.util.compose.ServerExposedDropdownMenu
 import io.homeassistant.companion.android.common.R as commonR
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AssistShortcutView(
     selectedServerId: Int,
@@ -46,8 +49,9 @@ fun AssistShortcutView(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(commonR.string.assist_shortcut)) },
-                backgroundColor = colorResource(commonR.color.colorBackground),
-                contentColor = colorResource(commonR.color.colorOnBackground)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = colorResource(id = commonR.color.colorBackground)
+                )
             )
         }
     ) { padding ->

@@ -2,8 +2,11 @@ package io.homeassistant.companion.android.settings.wear.views
 
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.material.IconButton
-import androidx.compose.material.TopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -14,7 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.themeadapter.material.MdcTheme
+import com.google.accompanist.themeadapter.material3.Mdc3Theme
 import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import io.homeassistant.companion.android.settings.wear.SettingsWearViewModel
@@ -29,7 +32,7 @@ fun LoadSettingsHomeView(
     loginWearOs: () -> Unit,
     onStartBackClicked: () -> Unit
 ) {
-    MdcTheme {
+    Mdc3Theme {
         val navController = rememberNavController()
         NavHost(navController = navController, startDestination = SettingsWearMainView.LANDING) {
             composable(SettingsWearMainView.FAVORITES) {
@@ -76,6 +79,7 @@ fun LoadSettingsHomeView(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsWearTopAppBar(
     title: @Composable () -> Unit,
@@ -107,7 +111,8 @@ fun SettingsWearTopAppBar(
                 }
             }
         },
-        backgroundColor = colorResource(id = commonR.color.colorBackground),
-        contentColor = colorResource(id = commonR.color.colorOnBackground)
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = colorResource(id = commonR.color.colorBackground)
+        )
     )
 }

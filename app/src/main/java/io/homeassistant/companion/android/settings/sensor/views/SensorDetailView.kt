@@ -25,22 +25,23 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.Card
-import androidx.compose.material.Checkbox
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Divider
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.RadioButton
-import androidx.compose.material.Scaffold
-import androidx.compose.material.SnackbarResult
-import androidx.compose.material.Surface
-import androidx.compose.material.Switch
-import androidx.compose.material.SwitchDefaults
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.material.contentColorFor
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Divider
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -98,10 +99,10 @@ fun SensorDetailView(
             viewModel.basicSensor != null && viewModel.basicSensor.enabledByDefault && viewModel.sensorManager?.checkPermission(context, viewModel.basicSensor.id) == true
             )
 
-    val scaffoldState = rememberScaffoldState()
+    val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect("snackbar") {
         viewModel.permissionSnackbar.onEach {
-            scaffoldState.snackbarHostState.showSnackbar(
+            snackbarHostState.showSnackbar(
                 context.getString(it.message),
                 context.getString(commonR.string.settings)
             ).let { result ->
@@ -116,7 +117,7 @@ fun SensorDetailView(
         }.launchIn(this)
     }
 
-    Scaffold(scaffoldState = scaffoldState) { contentPadding ->
+    Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) { contentPadding ->
         if (sensorUpdateTypeInfo && viewModel.basicSensor != null) {
             SensorDetailUpdateInfoDialog(
                 basicSensor = viewModel.basicSensor,
@@ -261,16 +262,19 @@ fun SensorDetailTopPanel(
     Surface(color = colorResource(commonR.color.colorSensorTopBackground)) {
         Column {
             CompositionLocalProvider(
-                LocalContentAlpha provides (if (sensor?.enabled == true) ContentAlpha.high else ContentAlpha.disabled)
+                LocalContentColor provides (
+                        if (sensor?.enabled == true) MaterialTheme.colorScheme.onSurface
+                        else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                )
             ) {
                 val cardElevation: Dp by animateDpAsState(if (sensor?.enabled == true) 8.dp else 1.dp)
                 Card(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 32.dp),
-                    elevation = cardElevation
+                    elevation = CardDefaults.cardElevation(defaultElevation = cardElevation)
                 ) {
                     Row(
                         modifier = Modifier
-                            .background(MaterialTheme.colors.background)
+                            .background(MaterialTheme.colorScheme.background)
                             .padding(all = 16.dp)
                             .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
@@ -289,12 +293,12 @@ fun SensorDetailTopPanel(
                                 contentDescription = stringResource(commonR.string.icon),
                                 modifier = Modifier
                                     .size(24.dp)
-                                    .alpha(if (sensor?.enabled == true) ContentAlpha.high else ContentAlpha.disabled),
+                                    .alpha(if (sensor?.enabled == true) 1f else 0.38f),
                                 colorFilter = ColorFilter.tint(
                                     if (sensor?.enabled == true) {
                                         colorResource(commonR.color.colorSensorIconEnabled)
                                     } else {
-                                        contentColorFor(backgroundColor = MaterialTheme.colors.background)
+                                        contentColorFor(backgroundColor = MaterialTheme.colorScheme.background)
                                     }
                                 )
                             )
@@ -412,9 +416,9 @@ fun SensorDetailHeader(text: String) {
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.body2,
+            style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colors.primary
+            color = MaterialTheme.colorScheme.primary
         )
     }
 }
@@ -442,20 +446,25 @@ fun SensorDetailRow(
         modifier = rowModifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        CompositionLocalProvider(LocalContentAlpha provides (if (enabled) ContentAlpha.high else ContentAlpha.disabled)) {
+        CompositionLocalProvider(
+            LocalContentColor provides (
+                if (enabled) MaterialTheme.colorScheme.onSurface
+                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+            )
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxHeight()
                     .weight(1f),
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(text = title, style = MaterialTheme.typography.body1)
+                Text(text = title, style = MaterialTheme.typography.bodyLarge)
                 if (summary != null) {
-                    CompositionLocalProvider(LocalContentAlpha provides (if (enabled) ContentAlpha.medium else ContentAlpha.disabled)) {
+                    CompositionLocalProvider(LocalContentColor provides (if (enabled) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f))) {
                         if (selectingEnabled) {
-                            SelectionContainer { Text(text = summary, style = MaterialTheme.typography.body2) }
+                            SelectionContainer { Text(text = summary, style = MaterialTheme.typography.bodyMedium) }
                         } else {
-                            Text(text = summary, style = MaterialTheme.typography.body2)
+                            Text(text = summary, style = MaterialTheme.typography.bodyMedium)
                         }
                     }
                 }

@@ -10,11 +10,10 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.contentColorFor
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -46,12 +45,12 @@ fun SettingsRow(
                 asset = mdiIcon,
                 modifier = Modifier
                     .size(24.dp)
-                    .alpha(if (enabled) ContentAlpha.high else ContentAlpha.disabled),
+                    .alpha(if (enabled) 1f else 0.38f),
                 colorFilter = ColorFilter.tint(
                     if (enabled) {
-                        MaterialTheme.colors.primary
+                        MaterialTheme.colorScheme.primary
                     } else {
-                        contentColorFor(backgroundColor = MaterialTheme.colors.background)
+                        contentColorFor(backgroundColor = MaterialTheme.colorScheme.background)
                     }
                 )
             )
@@ -64,12 +63,12 @@ fun SettingsRow(
         ) {
             Text(
                 text = primaryText,
-                style = MaterialTheme.typography.body1
+                style = MaterialTheme.typography.bodyLarge
             )
-            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+            CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant) {
                 Text(
                     text = secondaryText,
-                    style = MaterialTheme.typography.body2
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
         }

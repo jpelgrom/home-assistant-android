@@ -12,7 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
-import com.google.accompanist.themeadapter.material.MdcTheme
+import com.google.accompanist.themeadapter.material3.Mdc3Theme
 import com.google.android.gms.home.matter.Matter
 import com.google.android.gms.home.matter.commissioning.SharedDeviceData
 import dagger.hilt.android.AndroidEntryPoint
@@ -47,7 +47,7 @@ class MatterCommissioningActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            MdcTheme {
+            Mdc3Theme {
                 MatterCommissioningView(
                     step = viewModel.step,
                     deviceName = deviceName,

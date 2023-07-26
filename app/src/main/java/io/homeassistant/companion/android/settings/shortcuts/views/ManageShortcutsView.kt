@@ -11,14 +11,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.Button
-import androidx.compose.material.Divider
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.RadioButton
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -129,12 +129,13 @@ private fun CreateShortcutView(
 
                     DropdownMenu(expanded = expandedPinnedShortcuts, onDismissRequest = { expandedPinnedShortcuts = false }) {
                         for (item in pinnedShortCutIds) {
-                            DropdownMenuItem(onClick = {
-                                viewModel.setPinnedShortcutData(item)
-                                expandedPinnedShortcuts = false
-                            }) {
-                                Text(item)
-                            }
+                            DropdownMenuItem(
+                                text = { Text(item) },
+                                onClick = {
+                                    viewModel.setPinnedShortcutData(item)
+                                    expandedPinnedShortcuts = false
+                                }
+                            )
                         }
                     }
                 }

@@ -18,23 +18,20 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Button
-import androidx.compose.material.Chip
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Divider
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material3.AssistChip
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -56,7 +53,6 @@ import io.homeassistant.companion.android.common.R as commonR
 
 @OptIn(
     ExperimentalComposeUiApi::class,
-    ExperimentalMaterialApi::class,
     ExperimentalFoundationApi::class
 )
 @Composable
@@ -136,20 +132,17 @@ fun SsidView(
             (Build.VERSION.SDK_INT < Build.VERSION_CODES.R || activeSsid !== WifiManager.UNKNOWN_SSID)
         ) {
             item("ssid.suggestion") {
-                Chip(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                AssistChip(
+                    label = { Text(stringResource(commonR.string.add_ssid_name_suggestion, activeSsid)) },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Wifi,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    },
                     onClick = { onAddWifiSsid(activeSsid) }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Wifi,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Text(
-                        text = stringResource(commonR.string.add_ssid_name_suggestion, activeSsid),
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
-                }
+                )
             }
         }
         items(wifiSsids, key = { "ssid.item.$it" }) {
@@ -174,7 +167,7 @@ fun SsidView(
                     if (connected) {
                         colorResource(commonR.color.colorAccent)
                     } else {
-                        LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+                        LocalContentColor.current
                     }
                 )
                 Text(
@@ -221,9 +214,9 @@ fun SsidView(
                     ) {
                         Text(
                             text = stringResource(commonR.string.prioritize_internal_title),
-                            style = MaterialTheme.typography.body1
+                            style = MaterialTheme.typography.bodyLarge
                         )
-                        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+                        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant) {
                             Text(
                                 text = stringResource(
                                     if (prioritizeInternal) {
@@ -232,7 +225,7 @@ fun SsidView(
                                         commonR.string.prioritize_internal_off
                                     }
                                 ),
-                                style = MaterialTheme.typography.body2
+                                style = MaterialTheme.typography.bodyMedium
                             )
                         }
                     }
@@ -242,18 +235,20 @@ fun SsidView(
                             onDismissRequest = { prioritizeDropdown = false },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            DropdownMenuItem(onClick = {
-                                onSetPrioritize(false)
-                                prioritizeDropdown = false
-                            }) {
-                                Text(stringResource(commonR.string.prioritize_internal_off))
-                            }
-                            DropdownMenuItem(onClick = {
-                                onSetPrioritize(true)
-                                prioritizeDropdown = false
-                            }) {
-                                Text(stringResource(commonR.string.prioritize_internal_on_expanded))
-                            }
+                            DropdownMenuItem(
+                                text = { Text(stringResource(commonR.string.prioritize_internal_off)) },
+                                onClick = {
+                                    onSetPrioritize(false)
+                                    prioritizeDropdown = false
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(commonR.string.prioritize_internal_on_expanded)) },
+                                onClick = {
+                                    onSetPrioritize(true)
+                                    prioritizeDropdown = false
+                                }
+                            )
                         }
                     }
                 }

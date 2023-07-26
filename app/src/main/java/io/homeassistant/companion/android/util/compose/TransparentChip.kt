@@ -7,10 +7,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.contentColorFor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,7 +48,7 @@ fun TransparentChip(
             if (icon != null) {
                 Image(
                     asset = icon,
-                    colorFilter = ColorFilter.tint(MaterialTheme.colors.primary),
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
                     modifier = Modifier
                         .padding(horizontal = 8.dp)
                         .size(18.dp)
@@ -56,8 +56,8 @@ fun TransparentChip(
             }
             Text(
                 text = text,
-                color = contentColorFor(MaterialTheme.colors.onSurface),
-                style = MaterialTheme.typography.body2,
+                color = contentColorFor(MaterialTheme.colorScheme.onSurface),
+                style = MaterialTheme.typography.bodyMedium,
                 modifier =
                 if (icon != null) {
                     Modifier.padding(end = 16.dp)

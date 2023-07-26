@@ -8,7 +8,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.lifecycle.lifecycleScope
-import com.google.accompanist.themeadapter.material.MdcTheme
+import com.google.accompanist.themeadapter.material3.Mdc3Theme
 import dagger.hilt.android.AndroidEntryPoint
 import io.homeassistant.companion.android.BaseActivity
 import io.homeassistant.companion.android.common.data.servers.ServerManager
@@ -34,7 +34,7 @@ class TagReaderActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            MdcTheme {
+            Mdc3Theme {
                 TagReaderView()
             }
         }

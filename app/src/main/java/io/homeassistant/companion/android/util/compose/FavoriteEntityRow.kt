@@ -7,14 +7,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
@@ -48,7 +46,7 @@ fun FavoriteEntityRow(
         rowModifier = rowModifier.then(Modifier.detectReorderAfterLongPress(reorderableState))
     }
     Surface(
-        elevation = surfaceElevation.value
+        shadowElevation = surfaceElevation.value
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -57,9 +55,9 @@ fun FavoriteEntityRow(
             Column(
                 modifier = Modifier.weight(1f).padding(start = 16.dp)
             ) {
-                Text(text = entityName, style = MaterialTheme.typography.body1)
-                CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-                    Text(text = entityId, style = MaterialTheme.typography.body2)
+                Text(text = entityName, style = MaterialTheme.typography.bodyLarge)
+                CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant) {
+                    Text(text = entityId, style = MaterialTheme.typography.bodyMedium)
                 }
             }
             IconButton(onClick = onClick) {
@@ -69,7 +67,7 @@ fun FavoriteEntityRow(
                 )
             }
             if (draggable) {
-                CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+                CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant) {
                     Image(
                         asset = CommunityMaterial.Icon.cmd_drag_horizontal_variant,
                         contentDescription = stringResource(R.string.hold_to_reorder),
@@ -77,7 +75,7 @@ fun FavoriteEntityRow(
                         modifier = Modifier
                             .size(width = 40.dp, height = 24.dp)
                             .padding(end = 16.dp)
-                            .alpha(LocalContentAlpha.current)
+                            .alpha(1f)
                     )
                 }
             }

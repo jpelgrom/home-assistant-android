@@ -33,24 +33,25 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Divider
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.outlined.Keyboard
-import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -83,7 +84,7 @@ import io.homeassistant.companion.android.common.assist.AssistViewModelBase
 import kotlinx.coroutines.launch
 import io.homeassistant.companion.android.common.R as commonR
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AssistSheetView(
     conversation: List<AssistMessage>,
@@ -100,10 +101,9 @@ fun AssistSheetView(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val state = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Expanded,
-        skipHalfExpanded = true,
+        skipPartiallyExpanded = true,
         confirmValueChange = {
-            if (it == ModalBottomSheetValue.Hidden) {
+            if (it == SheetValue.Hidden) {
                 coroutineScope.launch { onHide() }
             }
             true
@@ -113,12 +113,13 @@ fun AssistSheetView(
 
     val sheetCornerRadius = dimensionResource(R.dimen.bottom_sheet_corner_radius)
 
-    ModalBottomSheetLayout(
+    ModalBottomSheet(
         sheetState = state,
-        sheetShape = RoundedCornerShape(topStart = sheetCornerRadius, topEnd = sheetCornerRadius),
+        shape = RoundedCornerShape(topStart = sheetCornerRadius, topEnd = sheetCornerRadius),
         scrimColor = Color.Transparent,
         modifier = Modifier.fillMaxSize(),
-        sheetContent = {
+        onDismissRequest = { onHide() },
+        content = {
             Box(
                 Modifier
                     .navigationBarsPadding()
@@ -162,9 +163,7 @@ fun AssistSheetView(
                 }
             }
         }
-    ) {
-        // The rest of the screen is empty
-    }
+    )
 }
 
 @Composable
@@ -195,7 +194,7 @@ fun AssistSheetHeader(
                     Text(
                         text = if (pipelineShowServer) "${currentPipeline.serverName}: ${currentPipeline.name}" else currentPipeline.name,
                         color = color,
-                        style = MaterialTheme.typography.caption
+                        style = MaterialTheme.typography.bodySmall
                     )
                     Icon(
                         imageVector = Icons.Default.ExpandMore,
@@ -213,21 +212,25 @@ fun AssistSheetHeader(
                     pipelines.forEach {
                         val isSelected =
                             it.serverId == currentPipeline.serverId && it.id == currentPipeline.id
-                        DropdownMenuItem(onClick = {
-                            onSelectPipeline(it.serverId, it.id)
-                            pipelineShowList = false
-                        }) {
-                            Text(
-                                text = if (pipelineShowServer) "${it.serverName}: ${it.name}" else it.name,
-                                fontWeight = if (isSelected) FontWeight.SemiBold else null
-                            )
-                        }
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = if (pipelineShowServer) "${it.serverName}: ${it.name}" else it.name,
+                                    fontWeight = if (isSelected) FontWeight.SemiBold else null
+                                )
+                            },
+                            onClick = {
+                                onSelectPipeline(it.serverId, it.id)
+                                pipelineShowList = false
+                            }
+                        )
                     }
                     if (onManagePipelines != null) {
                         Divider()
-                        DropdownMenuItem(onClick = { onManagePipelines() }) {
-                            Text(stringResource(commonR.string.assist_manage_pipelines))
-                        }
+                        DropdownMenuItem(
+                            text = { Text(stringResource(commonR.string.assist_manage_pipelines)) },
+                            onClick = { onManagePipelines() }
+                        )
                     }
                 }
             }
@@ -295,7 +298,7 @@ fun AssistSheetControls(
                 contentDescription = stringResource(
                     if (inputIsSend) commonR.string.assist_send_text else commonR.string.assist_start_listening
                 ),
-                colorFilter = ColorFilter.tint(MaterialTheme.colors.onSurface),
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
                 modifier = Modifier.size(24.dp)
             )
         }
@@ -329,11 +332,11 @@ fun AssistSheetControls(
                 onClick = { onMicrophoneInput() },
                 modifier = Modifier.size(48.dp),
                 shape = CircleShape,
-                border = if (inputIsActive) null else ButtonDefaults.outlinedBorder,
+                border = if (inputIsActive) null else ButtonDefaults.outlinedButtonBorder,
                 colors = if (inputIsActive) {
-                    ButtonDefaults.outlinedButtonColors(backgroundColor = Color.Transparent, contentColor = Color.Black)
+                    ButtonDefaults.outlinedButtonColors(containerColor = Color.Transparent, contentColor = Color.Black)
                 } else {
-                    ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colors.onSurface)
+                    ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)
                 },
                 contentPadding = PaddingValues(all = 0.dp)
             ) {
@@ -352,7 +355,7 @@ fun AssistSheetControls(
             Icon(
                 imageVector = Icons.Outlined.Keyboard,
                 contentDescription = stringResource(commonR.string.assist_enter_text),
-                tint = MaterialTheme.colors.onSurface
+                tint = MaterialTheme.colorScheme.onSurface
             )
         }
     }

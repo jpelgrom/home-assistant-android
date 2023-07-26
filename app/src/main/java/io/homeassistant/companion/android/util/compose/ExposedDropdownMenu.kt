@@ -2,12 +2,12 @@ package io.homeassistant.companion.android.util.compose
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ExposedDropdownMenuBox
-import androidx.compose.material.ExposedDropdownMenuDefaults
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,7 +19,7 @@ import androidx.compose.ui.res.stringResource
 import io.homeassistant.companion.android.database.server.Server
 import io.homeassistant.companion.android.common.R as commonR
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExposedDropdownMenu(label: String, keys: List<String>, currentIndex: Int?, onSelected: (Int) -> Unit, modifier: Modifier = Modifier) {
     var expanded by remember { mutableStateOf(false) }
@@ -40,13 +40,14 @@ fun ExposedDropdownMenu(label: String, keys: List<String>, currentIndex: Int?, o
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             keys.forEachIndexed { index, key ->
-                DropdownMenuItem(onClick = {
-                    onSelected(index)
-                    expanded = false
-                    focusManager.clearFocus()
-                }) {
-                    Text(key)
-                }
+                DropdownMenuItem(
+                    text = { Text(key) },
+                    onClick = {
+                        onSelected(index)
+                        expanded = false
+                        focusManager.clearFocus()
+                    }
+                )
             }
         }
     }
