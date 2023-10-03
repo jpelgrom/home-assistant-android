@@ -11,7 +11,7 @@ interface WebViewPresenter {
     fun onViewReady(path: String?)
 
     fun getActiveServer(): Int
-    fun updateActiveServer()
+    fun updateActiveServer(initialLoad: Boolean)
     fun setActiveServer(id: Int)
     fun switchActiveServer(id: Int)
     fun nextServer()

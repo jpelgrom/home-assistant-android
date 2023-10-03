@@ -37,6 +37,7 @@ class ServerSettingsPresenterImpl @Inject constructor(
             "trust_server" -> serverManager.integrationRepository(serverId).isTrusted()
             "app_lock" -> serverManager.authenticationRepository(serverId).isLockEnabledRaw()
             "app_lock_home_bypass" -> serverManager.authenticationRepository(serverId).isLockHomeBypassEnabled()
+            "activate_on_internal" -> serverManager.getServer(serverId)?.connection?.activateOnInternal == true
             else -> throw IllegalArgumentException("No boolean found by this key: $key")
         }
     }
@@ -47,6 +48,17 @@ class ServerSettingsPresenterImpl @Inject constructor(
                 "trust_server" -> serverManager.integrationRepository(serverId).setTrusted(value)
                 "app_lock" -> serverManager.authenticationRepository(serverId).setLockEnabled(value)
                 "app_lock_home_bypass" -> serverManager.authenticationRepository(serverId).setLockHomeBypassEnabled(value)
+                "activate_on_internal" -> {
+                    serverManager.getServer(serverId)?.let {
+                        serverManager.updateServer(
+                            it.copy(
+                                connection = it.connection.copy(
+                                    activateOnInternal = value
+                                )
+                            )
+                        )
+                    }
+                }
                 else -> throw IllegalArgumentException("No boolean found by this key: $key")
             }
         }

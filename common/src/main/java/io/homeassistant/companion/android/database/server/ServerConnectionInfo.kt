@@ -29,7 +29,9 @@ data class ServerConnectionInfo(
     @ColumnInfo(name = "internal_ssids")
     val internalSsids: List<String> = emptyList(),
     @ColumnInfo(name = "prioritize_internal")
-    val prioritizeInternal: Boolean = false
+    val prioritizeInternal: Boolean = false,
+    @ColumnInfo(name = "activate_on_internal", defaultValue = "FALSE")
+    val activateOnInternal: Boolean = false
 ) {
     @Ignore
     lateinit var wifiHelper: WifiHelper

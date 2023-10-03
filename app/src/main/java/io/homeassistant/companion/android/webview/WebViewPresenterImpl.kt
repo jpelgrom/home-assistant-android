@@ -63,7 +63,7 @@ class WebViewPresenterImpl @Inject constructor(
     private var matterCommissioningIntentSender: IntentSender? = null
 
     init {
-        updateActiveServer()
+        updateActiveServer(true)
     }
 
     override fun onViewReady(path: String?) {
@@ -117,10 +117,15 @@ class WebViewPresenterImpl @Inject constructor(
 
     override fun getActiveServer(): Int = serverId
 
-    override fun updateActiveServer() {
+    override fun updateActiveServer(initialLoad: Boolean) {
         if (serverManager.isRegistered()) {
             serverManager.getServer()?.let {
-                serverId = it.id
+                val isDifferent = serverId != it.id
+                if (isDifferent && !initialLoad) {
+                    switchActiveServer(it.id)
+                } else {
+                    serverId = it.id
+                }
             }
         }
     }

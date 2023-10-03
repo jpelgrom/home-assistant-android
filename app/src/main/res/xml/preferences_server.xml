@@ -66,6 +66,11 @@
     </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/other_settings">
+        <SwitchPreference
+            android:key="activate_on_internal"
+            android:title="@string/server_activate_home_title"
+            android:summary="@string/server_activate_home_summary"
+            app:isPreferenceVisible="false"/>
         <Preference
             android:key="websocket"
             android:icon="@drawable/ic_websocket"

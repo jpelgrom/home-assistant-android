@@ -776,13 +776,16 @@ class WebViewActivity : BaseActivity(), io.homeassistant.companion.android.webvi
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        presenter.updateActiveServer(false)
+    }
+
     override fun onResume() {
         super.onResume()
         if (currentAutoplay != presenter.isAutoPlayVideoEnabled()) {
             recreate()
         }
-
-        presenter.updateActiveServer()
 
         appLocked = presenter.isAppLocked()
         binding.blurView.setBlurEnabled(appLocked)

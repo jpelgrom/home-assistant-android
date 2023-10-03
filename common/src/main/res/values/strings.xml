@@ -736,6 +736,8 @@
     <string name="servers_devices_category">Servers &amp; devices</string>
     <string name="server_activate">Activate</string>
     <string name="server_activate_swipe_hint">Tip: quickly activate using a three-finger swipe left, right, or up when viewing a server.</string>
+    <string name="server_activate_home_summary">Automatically switch to this server, if not active, when connected to the home WiFi network</string>
+    <string name="server_activate_home_title">Activate on home WiFi</string>
     <string name="server_add">Add server</string>
     <string name="server_add_success">Server added</string>
     <string name="server_add_failed">Couldn\'t add server</string>

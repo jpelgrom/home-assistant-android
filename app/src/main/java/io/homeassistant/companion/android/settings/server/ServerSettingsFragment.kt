@@ -11,6 +11,7 @@ import android.os.Looper
 import android.text.InputType
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
@@ -207,31 +208,15 @@ class ServerSettingsFragment : ServerSettingsView, PreferenceFragmentCompat() {
     }
 
     override fun enableInternalConnection(isEnabled: Boolean) {
-        val iconTint = if (isEnabled) ContextCompat.getColor(requireContext(), commonR.color.colorAccent) else Color.DKGRAY
         val doEnable = isEnabled && hasLocationPermission()
 
-        findPreference<EditTextPreference>("connection_internal")?.let {
-            it.isEnabled = doEnable
-            try {
-                val unwrappedDrawable =
-                    AppCompatResources.getDrawable(requireContext(), R.drawable.ic_computer)
-                unwrappedDrawable?.setTint(iconTint)
-                it.icon = unwrappedDrawable
-            } catch (e: Exception) {
-                Log.e(TAG, "Unable to set the icon tint", e)
-            }
-        }
+        findPreference<EditTextPreference>("connection_internal")?.setEnabledAndIcon(R.drawable.ic_computer, doEnable)
 
-        findPreference<SwitchPreference>("app_lock_home_bypass")?.let {
-            it.isEnabled = doEnable
-            try {
-                val unwrappedDrawable =
-                    AppCompatResources.getDrawable(requireContext(), R.drawable.ic_wifi)
-                unwrappedDrawable?.setTint(iconTint)
-                it.icon = unwrappedDrawable
-            } catch (e: Exception) {
-                Log.e(TAG, "Unable to set the icon tint", e)
-            }
+        findPreference<SwitchPreference>("app_lock_home_bypass")?.setEnabledAndIcon(R.drawable.ic_wifi, doEnable)
+
+        findPreference<Preference>("activate_on_internal")?.let {
+            it.isVisible = presenter.hasMultipleServers()
+            it.setEnabledAndIcon(R.drawable.ic_home_switch, doEnable)
         }
     }
 
@@ -399,4 +384,16 @@ class ServerSettingsFragment : ServerSettingsView, PreferenceFragmentCompat() {
     }
 
     fun getServerId(): Int = serverId
+
+    private fun Preference.setEnabledAndIcon(@DrawableRes icon: Int, doEnable: Boolean) {
+        val iconTint = if (doEnable) ContextCompat.getColor(requireContext(), commonR.color.colorAccent) else Color.DKGRAY
+        try {
+            this.isEnabled = doEnable
+            val unwrappedDrawable = AppCompatResources.getDrawable(requireContext(), icon)
+            unwrappedDrawable?.setTint(iconTint)
+            this.icon = unwrappedDrawable
+        } catch (e: Exception) {
+            Log.e(TAG, "Unable to set the icon tint", e)
+        }
+    }
 }
