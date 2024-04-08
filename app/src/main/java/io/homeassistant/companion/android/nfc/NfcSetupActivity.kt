@@ -17,6 +17,10 @@ import io.homeassistant.companion.android.common.R as commonR
 import io.homeassistant.companion.android.nfc.views.LoadNfcView
 import io.homeassistant.companion.android.util.UrlUtil
 import io.homeassistant.companion.android.util.compose.HomeAssistantAppTheme
+import io.homeassistant.companion.android.webview.externalbus.ExternalBusMessage
+import io.homeassistant.companion.android.webview.externalbus.ExternalBusRepository
+import javax.inject.Inject
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -32,6 +36,9 @@ class NfcSetupActivity : BaseActivity() {
             if (intent?.action == NfcAdapter.ACTION_ADAPTER_STATE_CHANGED) viewModel.checkNfcEnabled()
         }
     }
+
+    @Inject
+    lateinit var externalBusRepository: ExternalBusRepository
 
     companion object {
         val TAG = NfcSetupActivity::class.simpleName
@@ -125,7 +132,19 @@ class NfcSetupActivity : BaseActivity() {
                             val message = commonR.string.nfc_write_tag_success
                             Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
 
-                            setResult(messageId)
+                            // TODO demo: send a response to the external bus from another activity
+                            externalBusRepository.send(
+                                ExternalBusMessage(
+                                    id = messageId,
+                                    type = "result",
+                                    success = true,
+                                    result = emptyMap<String, String>(),
+                                    callback = {
+                                        Log.d(TAG, "NFC Write Complete $it")
+                                    }
+                                )
+                            )
+                            delay(2000L)
                             finish()
                         } else {
                             viewModel.onNfcWriteSuccess(nfcTagToWriteUUID!!)

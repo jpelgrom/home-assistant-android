@@ -156,17 +156,7 @@ class WebViewActivity : BaseActivity(), io.homeassistant.companion.android.webvi
             }
         }
     private val writeNfcTag = registerForActivityResult(WriteNfcTag()) { messageId ->
-        sendExternalBusMessage(
-            ExternalBusMessage(
-                id = messageId,
-                type = "result",
-                success = true,
-                result = emptyMap<String, String>(),
-                callback = {
-                    Log.d(TAG, "NFC Write Complete $it")
-                }
-            )
-        )
+        // TODO demo: this is no longer used
     }
     private val showWebFileChooser = registerForActivityResult(ShowWebFileChooser()) { result ->
         mFilePathCallback?.onReceiveValue(result)
