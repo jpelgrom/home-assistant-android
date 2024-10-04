@@ -33,27 +33,40 @@ fun SetFavoritesView(
     val expandedStates = rememberExpandedStates(mainViewModel.supportedDomains())
 
     WearAppTheme {
-        ThemeLazyColumn {
-            item {
-                ListHeader(id = commonR.string.set_favorite)
-            }
-            for (domain in mainViewModel.entitiesByDomainOrder) {
-                val entities = mainViewModel.entitiesByDomain[domain].orEmpty()
-                if (entities.isNotEmpty()) {
-                    item {
-                        ExpandableListHeader(
-                            string = mainViewModel.stringForDomain(domain)!!,
-                            key = domain,
-                            expandedStates = expandedStates
-                        )
-                    }
-                    if (expandedStates[domain] == true) {
-                        items(entities, key = { it.entityId }) { entity ->
-                            FavoriteToggleChip(
-                                entity = entity,
-                                favoriteEntityIds = favoriteEntityIds,
-                                onFavoriteSelected = onFavoriteSelected
+        Scaffold(
+            positionIndicator = {
+                if (scalingLazyListState.isScrollInProgress) {
+                    PositionIndicator(scalingLazyListState = scalingLazyListState)
+                }
+            },
+            timeText = { TimeText(!scalingLazyListState.isScrollInProgress) }
+        ) {
+            ThemeLazyColumn(
+                state = scalingLazyListState
+            ) {
+                item {
+                    ListHeader(id = commonR.string.set_favorite)
+                }
+                for (domain in mainViewModel.domainsWithEntitiesOrdered) {
+                    val entities = mainViewModel.domainsWithEntities[domain].orEmpty()
+                    if (entities.isNotEmpty()) {
+                        item {
+                            ExpandableListHeader(
+                                string = mainViewModel.stringForDomain(domain)!!,
+                                key = domain,
+                                expandedStates = expandedStates
                             )
+                        }
+                        if (expandedStates[domain] == true) {
+                            items(entities, key = { it }) { entityId ->
+                                mainViewModel.entities[entityId]?.let {
+                                    FavoriteToggleChip(
+                                        entity = it,
+                                        favoriteEntityIds = favoriteEntityIds,
+                                        onFavoriteSelected = onFavoriteSelected
+                                    )
+                                }
+                            }
                         }
                     }
                 }

@@ -24,6 +24,7 @@ import io.homeassistant.companion.android.database.wear.EntityStateComplications
 import io.homeassistant.companion.android.database.wear.FavoritesDao
 import io.homeassistant.companion.android.database.wear.getAllFlow
 import javax.inject.Inject
+import io.homeassistant.companion.android.home.HomePresenterImpl
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
@@ -48,9 +49,9 @@ class ComplicationConfigViewModel @Inject constructor(
 
     var entities = mutableStateMapOf<String, Entity<*>>()
         private set
-    var entitiesByDomain = mutableStateMapOf<String, SnapshotStateList<Entity<*>>>()
+    var domainsWithEntities = mutableStateMapOf<String, SnapshotStateList<String>>()
         private set
-    var entitiesByDomainOrder = mutableStateListOf<String>()
+    var domainsWithEntitiesOrdered = mutableStateListOf<String>()
         private set
     val favoriteEntityIds = favoritesDao.getAllFlow().collectAsState()
 
@@ -117,22 +118,25 @@ class ComplicationConfigViewModel @Inject constructor(
     }
 
     private fun updateEntityDomains() {
-        val entitiesList = entities.values.toList().sortedBy { it.entityId }
+        val entitiesList = entities.values.toList().sortedBy { ((it.attributes as Map<String, Any?>)["friendly_name"] ?: it.entityId) as String }
         val domainsList = entitiesList.map { it.domain }.distinct()
 
         // Create a list with all discovered domains + their entities
         domainsList.forEach { domain ->
-            val entitiesInDomain = mutableStateListOf<Entity<*>>()
-            entitiesInDomain.addAll(entitiesList.filter { it.domain == domain })
-            entitiesByDomain[domain]?.let {
-                it.clear()
-                it.addAll(entitiesInDomain)
-            } ?: run {
-                entitiesByDomain[domain] = entitiesInDomain
-            }
+            val entitiesInDomain = mutableStateListOf<String>()
+            entitiesInDomain.addAll(
+                entitiesList
+                    .filter { it.domain == domain }
+                    .map { it.entityId }
+            )
+            domainsWithEntities[domain] = entitiesInDomain
         }
-        entitiesByDomainOrder.clear()
-        entitiesByDomainOrder.addAll(domainsList)
+        domainsWithEntitiesOrdered.clear()
+        domainsWithEntitiesOrdered.addAll(
+            domainsList
+                .map { HomePresenterImpl.domainsWithNames[it]?.let { stringRes -> getApplication<Application>().getString(stringRes) } ?: "" }
+                .sorted()
+        )
     }
 
     private fun updateSelectedEntity() {

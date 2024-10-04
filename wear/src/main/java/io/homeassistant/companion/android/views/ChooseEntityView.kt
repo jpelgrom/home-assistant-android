@@ -42,15 +42,16 @@ import java.util.Locale
 
 @Composable
 fun ChooseEntityView(
-    entitiesByDomainOrder: SnapshotStateList<String>,
-    entitiesByDomain: SnapshotStateMap<String, SnapshotStateList<Entity<*>>>,
+    allEntities: SnapshotStateMap<String, Entity<*>>,
+    entityLists: SnapshotStateMap<String, SnapshotStateList<String>>,
+    entityListsOrder: SnapshotStateList<String>,
     favoriteEntityIds: State<List<String>>,
     onNoneClicked: () -> Unit,
     onEntitySelected: (entity: SimplifiedEntity) -> Unit,
     allowNone: Boolean = true
 ) {
     // Remember expanded state of each header
-    val expandedStates = rememberExpandedStates(entitiesByDomainOrder)
+    val expandedStates = rememberExpandedStates(entityLists.keys.map { it.hashCode() })
     var expandedFavorites: Boolean by rememberSaveable { mutableStateOf(false) }
 
     WearAppTheme {
@@ -83,37 +84,40 @@ fun ChooseEntityView(
                     )
                 }
                 if (expandedFavorites) {
-                    items(favoriteEntityIds.value.size) { index ->
-                        val favoriteEntityID = favoriteEntityIds.value[index].split(",")[0]
-                        entitiesByDomain.flatMap { (_, values) -> values }
-                            .firstOrNull { it.entityId == favoriteEntityID }
-                            ?.let {
+                    items(
+                        items = favoriteEntityIds.value,
+                        key = { it }
+                    ) { value ->
+                        val favoriteEntityID = value.split(",")[0]
+                        allEntities[favoriteEntityID]?.let {
+                            ChooseEntityChip(
+                                entity = it,
+                                onEntitySelected = onEntitySelected
+                            )
+                        }
+                    }
+                }
+            }
+
+            for (header in entityListsOrder) {
+                val entities = entityLists[header].orEmpty()
+                if (entities.isNotEmpty()) {
+                    item {
+                        ExpandableListHeader(
+                            string = stringForDomain(header, LocalContext.current)
+                                ?: header.replace('_', ' ').capitalize(Locale.getDefault()),
+                            key = header.hashCode(),
+                            expandedStates = expandedStates
+                        )
+                    }
+                    if (expandedStates[header.hashCode()] == true) {
+                        items(entities, key = { it }) { entityId ->
+                            allEntities[entityId]?.let {
                                 ChooseEntityChip(
                                     entity = it,
                                     onEntitySelected = onEntitySelected
                                 )
                             }
-                    }
-                }
-            }
-
-            for (domain in entitiesByDomainOrder) {
-                val entities = entitiesByDomain[domain]
-                if (!entities.isNullOrEmpty()) {
-                    item {
-                        ExpandableListHeader(
-                            string = stringForDomain(domain, LocalContext.current)
-                                ?: domain.replace('_', ' ').capitalize(Locale.getDefault()),
-                            key = domain,
-                            expandedStates = expandedStates
-                        )
-                    }
-                    if (expandedStates[domain] == true) {
-                        items(entities, key = { it.entityId }) { entity ->
-                            ChooseEntityChip(
-                                entity = entity,
-                                onEntitySelected = onEntitySelected
-                            )
                         }
                     }
                 }

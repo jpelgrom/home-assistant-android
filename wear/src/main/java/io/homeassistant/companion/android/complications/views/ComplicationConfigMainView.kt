@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
@@ -68,8 +69,9 @@ fun LoadConfigView(
             }
             composable(SCREEN_CHOOSE_ENTITY) {
                 ChooseEntityView(
-                    entitiesByDomainOrder = complicationConfigViewModel.entitiesByDomainOrder,
-                    entitiesByDomain = complicationConfigViewModel.entitiesByDomain,
+                    allEntities = complicationConfigViewModel.entities,
+                    entityLists = complicationConfigViewModel.domainsWithEntities,
+                    entityListsOrder = complicationConfigViewModel.domainsWithEntities.keys.toMutableStateList(), // TODO
                     favoriteEntityIds = complicationConfigViewModel.favoriteEntityIds,
                     onNoneClicked = {},
                     onEntitySelected = { entity ->

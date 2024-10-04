@@ -2,6 +2,8 @@ package io.homeassistant.companion.android.home.views
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -25,9 +27,9 @@ import io.homeassistant.companion.android.views.rememberExpandedStates
 
 @Composable
 fun EntityViewList(
-    entityLists: Map<String, List<Entity<*>>>,
+    allEntities: Map<String, Entity<*>>,
+    entityLists: Map<String, List<String>>,
     entityListsOrder: List<String>,
-    entityListFilter: (Entity<*>) -> Boolean,
     onEntityClicked: (String, String) -> Unit,
     onEntityLongClicked: (String) -> Unit,
     isHapticEnabled: Boolean,
@@ -52,18 +54,19 @@ fun EntityViewList(
                             ListHeader(header)
                         }
                     }
-                    if (expandedStates[header.hashCode()]!!) {
-                        val filtered = entities.filter { entityListFilter(it) }
-                        items(filtered, key = { it.entityId }) { entity ->
-                            EntityUi(
-                                entity,
-                                onEntityClicked,
-                                isHapticEnabled,
-                                isToastEnabled
-                            ) { entityId -> onEntityLongClicked(entityId) }
+                    if (expandedStates[header.hashCode()] == true) {
+                        items(entities, key = { it }) { entityId ->
+                            allEntities[entityId]?.let {
+                                EntityUi(
+                                    it,
+                                    onEntityClicked,
+                                    isHapticEnabled,
+                                    isToastEnabled
+                                ) { entityId -> onEntityLongClicked(entityId) }
+                            }
                         }
 
-                        if (filtered.isEmpty()) {
+                        if (entities.isEmpty()) {
                             item {
                                 Column {
                                     Button(
@@ -90,9 +93,9 @@ fun EntityViewList(
 @Composable
 private fun PreviewEntityListView() {
     EntityViewList(
-        entityLists = mapOf(stringResource(commonR.string.lights) to listOf(previewEntity1, previewEntity2)),
+        allEntities = mapOf(previewEntity1.entityId to previewEntity1, previewEntity2.entityId to previewEntity2),
+        entityLists = mapOf(stringResource(commonR.string.lights) to listOf(previewEntity1.entityId, previewEntity2.entityId)),
         entityListsOrder = listOf(stringResource(commonR.string.lights)),
-        entityListFilter = { true },
         onEntityClicked = { _, _ -> },
         onEntityLongClicked = { },
         isHapticEnabled = false,
@@ -104,9 +107,9 @@ private fun PreviewEntityListView() {
 @Composable
 private fun PreviewEntityListScenes() {
     EntityViewList(
-        entityLists = mapOf(stringResource(commonR.string.scenes) to listOf(playPreviewEntityScene1, playPreviewEntityScene2, playPreviewEntityScene3)),
+        allEntities = mapOf(playPreviewEntityScene1.entityId to playPreviewEntityScene1, playPreviewEntityScene2.entityId to playPreviewEntityScene2),
+        entityLists = mapOf(stringResource(commonR.string.scenes) to listOf(playPreviewEntityScene1.entityId, playPreviewEntityScene2.entityId)),
         entityListsOrder = listOf(stringResource(commonR.string.scenes)),
-        entityListFilter = { true },
         onEntityClicked = { _, _ -> },
         onEntityLongClicked = { },
         isHapticEnabled = false,

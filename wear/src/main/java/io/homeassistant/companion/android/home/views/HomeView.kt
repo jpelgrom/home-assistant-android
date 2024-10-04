@@ -78,12 +78,11 @@ fun LoadHomePage(
                     },
                     onRetryLoadEntitiesClicked = mainViewModel::loadEntities,
                     onSettingsClicked = { swipeDismissableNavController.navigate(SCREEN_SETTINGS) },
-                    onNavigationClicked = { lists, order, filter ->
+                    onNavigationClicked = { lists ->
                         mainViewModel.entityLists.clear()
                         mainViewModel.entityLists.putAll(lists)
                         mainViewModel.entityListsOrder.clear()
-                        mainViewModel.entityListsOrder.addAll(order)
-                        mainViewModel.entityListFilter = filter
+                        mainViewModel.entityListsOrder.addAll(lists.keys.sorted())
                         swipeDismissableNavController.navigate(SCREEN_ENTITY_LIST)
                     },
                     isHapticEnabled = mainViewModel.isHapticEnabled.value,
@@ -124,9 +123,9 @@ fun LoadHomePage(
             }
             composable(SCREEN_ENTITY_LIST) {
                 EntityViewList(
+                    allEntities = mainViewModel.entities,
                     entityLists = mainViewModel.entityLists,
                     entityListsOrder = mainViewModel.entityListsOrder,
-                    entityListFilter = mainViewModel.entityListFilter,
                     onEntityClicked = { entityId, state ->
                         mainViewModel.toggleEntity(entityId, state)
                     },
@@ -324,8 +323,9 @@ fun LoadHomePage(
                 val entityIndex = backStackEntry.arguments!!.getInt(ARG_SCREEN_SHORTCUTS_TILE_ENTITY_INDEX)
                 val tileId = backStackEntry.arguments!!.getString(ARG_SCREEN_SHORTCUTS_TILE_ID)!!.toIntOrNull()
                 ChooseEntityView(
-                    entitiesByDomainOrder = mainViewModel.entitiesByDomainOrder,
-                    entitiesByDomain = mainViewModel.entitiesByDomain,
+                    allEntities = mainViewModel.entities,
+                    entityLists = mainViewModel.domainsWithEntities,
+                    entityListsOrder = mainViewModel.domainsWithEntitiesOrdered,
                     favoriteEntityIds = mainViewModel.favoriteEntityIds,
                     onNoneClicked = {
                         mainViewModel.clearTileShortcut(tileId, entityIndex)
