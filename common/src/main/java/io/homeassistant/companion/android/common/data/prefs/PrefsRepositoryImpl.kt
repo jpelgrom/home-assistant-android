@@ -36,6 +36,7 @@ class PrefsRepositoryImpl @Inject constructor(
         private const val PREF_IGNORED_SUGGESTIONS = "ignored_suggestions"
         private const val PREF_AUTO_FAVORITES = "auto_favorites"
         private const val PREF_LOCATION_HISTORY_DISABLED = "location_history"
+        private const val PREF_CLOUD_PUSH_PROVIDER = "cloud_push_provider"
     }
 
     init {
@@ -241,6 +242,13 @@ class PrefsRepositoryImpl @Inject constructor(
 
     override suspend fun setLocationHistoryEnabled(enabled: Boolean) {
         localStorage.putBoolean(PREF_LOCATION_HISTORY_DISABLED, !enabled)
+    }
+
+    override suspend fun getCloudPushProvider(): String? =
+        localStorage.getString(PREF_CLOUD_PUSH_PROVIDER)
+
+    override suspend fun setCloudPushProvider(provider: String?) {
+        localStorage.putString(PREF_CLOUD_PUSH_PROVIDER, provider)
     }
 
     override suspend fun removeServer(serverId: Int) {

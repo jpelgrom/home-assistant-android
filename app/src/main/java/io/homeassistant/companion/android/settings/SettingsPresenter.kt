@@ -22,6 +22,7 @@ interface SettingsPresenter {
     fun getSuggestionFlow(): StateFlow<SettingsHomeSuggestion?>
     fun getServersFlow(): StateFlow<List<Server>>
     fun getServerCount(): Int
+    fun getNotificationProviders(context: Context): List<String>
     suspend fun getNotificationRateLimits(): RateLimitResponse?
     fun showChangeLog(context: Context)
 }

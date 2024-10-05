@@ -44,6 +44,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import org.unifiedpush.android.connector.UnifiedPush
 
 class SettingsPresenterImpl @Inject constructor(
     private val serverManager: ServerManager,
@@ -112,6 +113,7 @@ class SettingsPresenterImpl @Inject constructor(
             "languages" -> langsManager.getCurrentLang()
             "page_zoom" -> prefsRepository.getPageZoomLevel().toString()
             "screen_orientation" -> prefsRepository.getScreenOrientation()
+            "notification_cloud_provider" -> prefsRepository.getCloudPushProvider()
             else -> throw IllegalArgumentException("No string found by this key: $key")
         }
     }
@@ -123,6 +125,7 @@ class SettingsPresenterImpl @Inject constructor(
                 "languages" -> langsManager.saveLang(value)
                 "page_zoom" -> prefsRepository.setPageZoomLevel(value?.toIntOrNull())
                 "screen_orientation" -> prefsRepository.saveScreenOrientation(value)
+                "notification_cloud_provider" -> prefsRepository.setCloudPushProvider(value)
                 else -> throw IllegalArgumentException("No string found by this key: $key")
             }
         }
@@ -145,6 +148,12 @@ class SettingsPresenterImpl @Inject constructor(
     override fun getServersFlow(): StateFlow<List<Server>> = serverManager.defaultServersFlow
 
     override fun getServerCount(): Int = serverManager.defaultServers.size
+
+    override fun getNotificationProviders(context: Context): List<String> {
+        val default = if (BuildConfig.FLAVOR == "full") "fcm" else "none"
+        val up = UnifiedPush.getDistributors(context)
+        return listOf(default) + up
+    }
 
     override suspend fun getNotificationRateLimits(): RateLimitResponse? = withContext(Dispatchers.IO) {
         try {
@@ -185,7 +194,7 @@ class SettingsPresenterImpl @Inject constructor(
                     DeviceRegistration(
                         "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
                         deviceName,
-                        messagingToken
+                        pushToken = messagingToken
                     )
                 )
                 serverManager.getServer()?.id?.let {

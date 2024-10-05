@@ -184,7 +184,7 @@ class LaunchActivity : AppCompatActivity(), LaunchView {
                 DeviceRegistration(
                     "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
                     deviceName,
-                    messagingToken
+                    pushToken = messagingToken
                 )
             )
             serverId = serverManager.convertTemporaryServer(serverId)

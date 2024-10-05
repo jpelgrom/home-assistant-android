@@ -120,6 +120,12 @@
             android:title="@string/notification_history"
             android:icon="@drawable/ic_notification_history"
             android:summary="@string/notification_history_summary" />
+        <ListPreference
+            android:key="notification_cloud_provider"
+            android:title="Cloud push notification provider"
+            app:isPreferenceVisible="false"
+            android:icon="@drawable/ic_notifications_setting"
+            app:useSimpleSummaryProvider="true"/>
         <Preference
             android:key="notification_rate_limit"
             android:title="@string/rate_limit_title"
