@@ -217,6 +217,7 @@ dependencies {
 
     implementation(libs.zxing)
     implementation(libs.improv)
+    implementation(libs.unifiedpush.connector)
 
     implementation(libs.car.core)
     implementation(libs.car.automotive)

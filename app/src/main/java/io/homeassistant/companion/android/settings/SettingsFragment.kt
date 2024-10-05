@@ -57,6 +57,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.unifiedpush.android.connector.UnifiedPush
 
 class SettingsFragment(
     private val presenter: SettingsPresenter,
@@ -259,6 +260,24 @@ class SettingsFragment(
                     addToBackStack(getString(commonR.string.notifications))
                 }
                 return@setOnPreferenceClickListener true
+            }
+        }
+
+        findPreference<ListPreference>("notification_cloud_provider")?.let {
+            lifecycleScope.launch {
+                val options = context?.let { ctx -> presenter.getNotificationProviders(ctx) } ?: emptyList()
+                it.entries = options.toTypedArray()
+                it.entryValues = options.toTypedArray()
+                it.isVisible = options.size > 1
+                it.setOnPreferenceChangeListener { _, newValue ->
+                    if (newValue is String && newValue != "fcm" && newValue != "none") {
+                        context?.let { context ->
+                            UnifiedPush.saveDistributor(context, newValue)
+                            UnifiedPush.registerApp(context)
+                        }
+                    }
+                    return@setOnPreferenceChangeListener true
+                }
             }
         }
 

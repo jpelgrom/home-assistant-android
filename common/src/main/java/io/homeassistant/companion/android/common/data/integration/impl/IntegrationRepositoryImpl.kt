@@ -53,9 +53,10 @@ class IntegrationRepositoryImpl @AssistedInject constructor(
         private const val APP_ID = "io.homeassistant.companion.android"
         private const val APP_NAME = "Home Assistant"
         private const val OS_NAME = "Android"
-        private const val PUSH_URL = BuildConfig.PUSH_URL
+        private const val HA_PUSH_URL = BuildConfig.PUSH_URL
 
         private const val PREF_APP_VERSION = "app_version" // Note: _not_ server-specific
+        private const val PREF_PUSH_URL = "push_url" // Note: _not_ server-specific
         private const val PREF_PUSH_TOKEN = "push_token" // Note: _not_ server-specific
         private const val PREF_ORPHANED_THREAD_BORDER_AGENT_IDS = "orphaned_thread_border_agent_ids" // Note: _not_ server-specific
 
@@ -168,6 +169,7 @@ class IntegrationRepositoryImpl @AssistedInject constructor(
         return DeviceRegistration(
             localStorage.getString(PREF_APP_VERSION),
             server.deviceName,
+            localStorage.getString(PREF_PUSH_URL),
             localStorage.getString(PREF_PUSH_TOKEN)
         )
     }
@@ -178,6 +180,13 @@ class IntegrationRepositoryImpl @AssistedInject constructor(
         }
         if (deviceRegistration.deviceName != null) {
             serverManager.updateServer(server.copy(deviceName = deviceRegistration.deviceName))
+        }
+        if (deviceRegistration.pushUrl != null) {
+            if (deviceRegistration.pushUrl != HA_PUSH_URL) {
+                localStorage.putString(PREF_PUSH_URL, deviceRegistration.pushUrl)
+            } else {
+                localStorage.putString(PREF_PUSH_URL, null)
+            }
         }
         if (deviceRegistration.pushToken != null) {
             localStorage.putString(PREF_PUSH_TOKEN, deviceRegistration.pushToken)
@@ -813,11 +822,12 @@ class IntegrationRepositoryImpl @AssistedInject constructor(
 
     private suspend fun createUpdateRegistrationRequest(deviceRegistration: DeviceRegistration): RegisterDeviceRequest {
         val oldDeviceRegistration = getRegistration()
+        val pushUrl = deviceRegistration.pushUrl?.ifBlank { HA_PUSH_URL } ?: HA_PUSH_URL
         val pushToken = deviceRegistration.pushToken ?: oldDeviceRegistration.pushToken
 
         val appData = mutableMapOf<String, Any>("push_websocket_channel" to deviceRegistration.pushWebsocket)
-        if (!pushToken.isNullOrBlank()) {
-            appData["push_url"] = PUSH_URL
+        if ((pushUrl == HA_PUSH_URL && !pushToken.isNullOrBlank()) || pushToken != null) {
+            appData["push_url"] = pushUrl
             appData["push_token"] = pushToken
         }
 

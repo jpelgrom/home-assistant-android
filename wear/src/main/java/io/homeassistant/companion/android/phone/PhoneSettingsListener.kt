@@ -184,8 +184,8 @@ class PhoneSettingsListener : WearableListenerService(), DataClient.OnDataChange
                 DeviceRegistration(
                     "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
                     deviceName,
-                    getMessagingToken(),
-                    false
+                    pushToken = getMessagingToken(),
+                    pushWebsocket = false
                 )
             )
             serverManager.convertTemporaryServer(serverId)
