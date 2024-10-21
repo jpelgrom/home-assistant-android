@@ -17,6 +17,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.homeassistant.companion.android.BuildConfig
 import io.homeassistant.companion.android.common.R as commonR
 import io.homeassistant.companion.android.common.data.integration.DeviceRegistration
+import io.homeassistant.companion.android.common.data.prefs.PrefsRepository
+import io.homeassistant.companion.android.common.data.prefs.impl.entities.CloudPushProvider
 import io.homeassistant.companion.android.common.data.servers.ServerManager
 import io.homeassistant.companion.android.database.sensor.SensorDao
 import io.homeassistant.companion.android.database.server.Server
@@ -26,7 +28,7 @@ import io.homeassistant.companion.android.database.server.ServerType
 import io.homeassistant.companion.android.database.server.ServerUserInfo
 import io.homeassistant.companion.android.database.settings.WebsocketSetting
 import io.homeassistant.companion.android.onboarding.OnboardApp
-import io.homeassistant.companion.android.onboarding.getMessagingToken
+import io.homeassistant.companion.android.onboarding.getFirebaseMessagingToken
 import io.homeassistant.companion.android.sensors.LocationSensorManager
 import io.homeassistant.companion.android.settings.SettingViewModel
 import io.homeassistant.companion.android.settings.server.ServerChooserFragment
@@ -57,6 +59,9 @@ class LaunchActivity : AppCompatActivity(), LaunchView {
 
     @Inject
     lateinit var sensorDao: SensorDao
+
+    @Inject
+    lateinit var prefsRepository: PrefsRepository
 
     private val mainScope = CoroutineScope(Dispatchers.Main + Job())
 
@@ -124,8 +129,14 @@ class LaunchActivity : AppCompatActivity(), LaunchView {
         mainScope.launch {
             if (result != null) {
                 val (url, authCode, deviceName, deviceTrackingEnabled, notificationsEnabled) = result
-                val messagingToken = getMessagingToken()
-                if (messagingToken.isBlank() && BuildConfig.FLAVOR == "full") {
+                val pushConfig = prefsRepository.getCloudPushConfig()
+                val messagingUsesFcm = (pushConfig.provider == null && BuildConfig.FLAVOR == "full") || pushConfig.provider == CloudPushProvider.FCM.name
+                val messagingToken = if (messagingUsesFcm) {
+                    getFirebaseMessagingToken()
+                } else {
+                    pushConfig.token
+                }
+                if (messagingToken?.isBlank() == true && messagingUsesFcm) {
                     AlertDialog.Builder(this@LaunchActivity)
                         .setTitle(commonR.string.firebase_error_title)
                         .setMessage(commonR.string.firebase_error_message)
@@ -162,7 +173,7 @@ class LaunchActivity : AppCompatActivity(), LaunchView {
         url: String,
         authCode: String,
         deviceName: String,
-        messagingToken: String,
+        messagingToken: String?,
         deviceTrackingEnabled: Boolean,
         notificationsEnabled: Boolean
     ) {

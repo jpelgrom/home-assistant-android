@@ -16,6 +16,8 @@ import io.homeassistant.companion.android.common.R as commonR
 import io.homeassistant.companion.android.common.data.integration.DeviceRegistration
 import io.homeassistant.companion.android.common.data.integration.impl.entities.RateLimitResponse
 import io.homeassistant.companion.android.common.data.prefs.PrefsRepository
+import io.homeassistant.companion.android.common.data.prefs.impl.entities.CloudPushConfig
+import io.homeassistant.companion.android.common.data.prefs.impl.entities.CloudPushProvider
 import io.homeassistant.companion.android.common.data.servers.ServerManager
 import io.homeassistant.companion.android.database.sensor.SensorDao
 import io.homeassistant.companion.android.database.server.Server
@@ -28,7 +30,7 @@ import io.homeassistant.companion.android.database.settings.Setting
 import io.homeassistant.companion.android.database.settings.SettingsDao
 import io.homeassistant.companion.android.database.settings.WebsocketSetting
 import io.homeassistant.companion.android.onboarding.OnboardApp
-import io.homeassistant.companion.android.onboarding.getMessagingToken
+import io.homeassistant.companion.android.onboarding.getFirebaseMessagingToken
 import io.homeassistant.companion.android.sensors.LocationSensorManager
 import io.homeassistant.companion.android.settings.language.LanguagesManager
 import io.homeassistant.companion.android.themes.ThemesManager
@@ -113,7 +115,10 @@ class SettingsPresenterImpl @Inject constructor(
             "languages" -> langsManager.getCurrentLang()
             "page_zoom" -> prefsRepository.getPageZoomLevel().toString()
             "screen_orientation" -> prefsRepository.getScreenOrientation()
-            "notification_cloud_provider" -> prefsRepository.getCloudPushProvider()
+            "notification_push_provider" -> {
+                prefsRepository.getCloudPushConfig().provider
+                    ?: (if (BuildConfig.FLAVOR == "full") CloudPushProvider.FCM.name else CloudPushProvider.NONE.name)
+            }
             else -> throw IllegalArgumentException("No string found by this key: $key")
         }
     }
@@ -125,7 +130,10 @@ class SettingsPresenterImpl @Inject constructor(
                 "languages" -> langsManager.saveLang(value)
                 "page_zoom" -> prefsRepository.setPageZoomLevel(value?.toIntOrNull())
                 "screen_orientation" -> prefsRepository.saveScreenOrientation(value)
-                "notification_cloud_provider" -> prefsRepository.setCloudPushProvider(value)
+                "notification_push_provider" -> {
+                    val pushConfig = prefsRepository.getCloudPushConfig()
+                    prefsRepository.setCloudPushConfig(pushConfig.copy(provider = value))
+                }
                 else -> throw IllegalArgumentException("No string found by this key: $key")
             }
         }
@@ -150,9 +158,53 @@ class SettingsPresenterImpl @Inject constructor(
     override fun getServerCount(): Int = serverManager.defaultServers.size
 
     override fun getNotificationProviders(context: Context): List<String> {
-        val default = if (BuildConfig.FLAVOR == "full") "fcm" else "none"
+        val default = if (BuildConfig.FLAVOR == "full") CloudPushProvider.FCM.name else CloudPushProvider.NONE.name
         val up = UnifiedPush.getDistributors(context)
         return listOf(default) + up
+    }
+
+    override suspend fun setNotificationProvider(context: Context, newProvider: String?) {
+        val pushConfig = prefsRepository.getCloudPushConfig()
+        mainScope.launch(Dispatchers.IO) {
+            if (pushConfig.provider != newProvider) {
+                // Unregister with old
+                if (pushConfig.provider == CloudPushProvider.FCM.name) {
+                    // TODO unregister from Firebase?
+                } else if (pushConfig.isUnifiedPush) {
+                    view.getAppContext()?.let { UnifiedPush.unregisterApp(it) }
+                }
+
+                // Register with new
+                when (newProvider) {
+                    CloudPushProvider.NONE.name -> {
+                        prefsRepository.setCloudPushConfig(CloudPushConfig(CloudPushProvider.NONE.name, null, ""))
+                    }
+                    CloudPushProvider.FCM.name -> {
+                        prefsRepository.setCloudPushConfig(CloudPushConfig(CloudPushProvider.FCM.name, null, getFirebaseMessagingToken()))
+                    }
+                    null -> { /* Do nothing */ }
+                    else -> {
+                        view.getAppContext()?.let {
+                            prefsRepository.setCloudPushConfig(CloudPushConfig(newProvider, null, ""))
+                            UnifiedPush.saveDistributor(it, newProvider)
+                            UnifiedPush.registerApp(it)
+                        }
+                    }
+                }
+                if (newProvider in listOf(null, CloudPushProvider.NONE.name, CloudPushProvider.FCM.name)) { // UnifiedPush will update registrations itself
+                    serverManager.defaultServers.forEach {
+                        launch {
+                            try {
+                                val integration = serverManager.integrationRepository(it.id)
+                                serverManager.integrationRepository(it.id).updateRegistration(integration.getRegistration())
+                            } catch (e: Exception) {
+                                Log.w(TAG, "Couldn't update registration for server", e)
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     override suspend fun getNotificationRateLimits(): RateLimitResponse? = withContext(Dispatchers.IO) {
@@ -175,7 +227,6 @@ class SettingsPresenterImpl @Inject constructor(
     override suspend fun addServer(result: OnboardApp.Output?) {
         if (result != null) {
             val (url, authCode, deviceName, deviceTrackingEnabled, notificationsEnabled) = result
-            val messagingToken = getMessagingToken()
             var serverId: Int? = null
             try {
                 val formattedUrl = UrlUtil.formattedUrlString(url)
@@ -193,8 +244,7 @@ class SettingsPresenterImpl @Inject constructor(
                 serverManager.integrationRepository(serverId).registerDevice(
                     DeviceRegistration(
                         "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
-                        deviceName,
-                        pushToken = messagingToken
+                        deviceName
                     )
                 )
                 serverManager.getServer()?.id?.let {

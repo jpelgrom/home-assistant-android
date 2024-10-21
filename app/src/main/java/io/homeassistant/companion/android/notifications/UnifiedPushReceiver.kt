@@ -4,6 +4,8 @@ import android.content.Context
 import android.util.Log
 import dagger.hilt.android.AndroidEntryPoint
 import io.homeassistant.companion.android.common.data.integration.DeviceRegistration
+import io.homeassistant.companion.android.common.data.prefs.PrefsRepository
+import io.homeassistant.companion.android.common.data.prefs.impl.entities.CloudPushConfig
 import io.homeassistant.companion.android.common.data.servers.ServerManager
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -18,11 +20,14 @@ import org.unifiedpush.android.connector.MessagingReceiver
 class UnifiedPushReceiver : MessagingReceiver() {
     companion object {
         private const val TAG = "UPReceiver"
-        private const val SOURCE = "UnifiedPush (%s)"
+        private const val SOURCE = "UnifiedPush"
     }
 
     @Inject
     lateinit var serverManager: ServerManager
+
+    @Inject
+    lateinit var prefsRepository: PrefsRepository
 
     @Inject
     lateinit var messagingManager: MessagingManager
@@ -35,7 +40,6 @@ class UnifiedPushReceiver : MessagingReceiver() {
         val asJson = JSONObject(asString)
 
         val flattened = mutableMapOf<String, String>()
-        // TODO try to share with WebsocketManager
         if (asJson.has("data")) {
             val data = try {
                 asJson.getJSONObject("data")
@@ -65,7 +69,11 @@ class UnifiedPushReceiver : MessagingReceiver() {
             }
         }
         if (asJson.has("registration_info")) {
-            flattened["webhook_id"] = asJson.getJSONObject("registration_info").getString("webhook_id")
+            asJson.getJSONObject("registration_info").let {
+                if (it.has("webhook_id")) {
+                    flattened["webhook_id"] = it.getString("webhook_id")
+                }
+            }
         }
 
         messagingManager.handleMessage(flattened, SOURCE)
@@ -74,11 +82,18 @@ class UnifiedPushReceiver : MessagingReceiver() {
     override fun onNewEndpoint(context: Context, endpoint: String, instance: String) {
         mainScope.launch(Dispatchers.IO) {
             Log.d(TAG, "Refreshed endpoint: $endpoint")
-            // TODO store endpoint for future reference
+
+            val pushConfig = prefsRepository.getCloudPushConfig()
+            if (pushConfig.isUnifiedPush) {
+                // Persist endpoint for future use
+                prefsRepository.setCloudPushConfig(pushConfig.copy(url = endpoint, token = ""))
+            }
+
             if (!serverManager.isRegistered()) {
                 Log.d(TAG, "Not trying to update registration since we aren't authenticated.")
                 return@launch
             }
+
             serverManager.defaultServers.forEach {
                 launch {
                     try {
@@ -95,10 +110,16 @@ class UnifiedPushReceiver : MessagingReceiver() {
     }
 
     override fun onRegistrationFailed(context: Context, instance: String) {
-        // TODO
+        Log.w(TAG, "Could not register, resetting to default")
+        mainScope.launch(Dispatchers.IO) {
+            prefsRepository.setCloudPushConfig(CloudPushConfig(null, null, null))
+        }
     }
 
     override fun onUnregistered(context: Context, instance: String) {
-        // TODO
+        Log.d(TAG, "Lost endpoint, resetting to default")
+        mainScope.launch(Dispatchers.IO) {
+            prefsRepository.setCloudPushConfig(CloudPushConfig(null, null, null))
+        }
     }
 }

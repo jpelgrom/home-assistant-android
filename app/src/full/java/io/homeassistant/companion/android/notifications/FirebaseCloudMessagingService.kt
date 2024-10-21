@@ -5,6 +5,8 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import dagger.hilt.android.AndroidEntryPoint
 import io.homeassistant.companion.android.common.data.integration.DeviceRegistration
+import io.homeassistant.companion.android.common.data.prefs.PrefsRepository
+import io.homeassistant.companion.android.common.data.prefs.impl.entities.CloudPushProvider
 import io.homeassistant.companion.android.common.data.servers.ServerManager
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -21,6 +23,9 @@ class FirebaseCloudMessagingService : FirebaseMessagingService() {
 
     @Inject
     lateinit var serverManager: ServerManager
+
+    @Inject
+    lateinit var prefsRepository: PrefsRepository
 
     @Inject
     lateinit var messagingManager: MessagingManager
@@ -41,10 +46,18 @@ class FirebaseCloudMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         mainScope.launch {
             Log.d(TAG, "Refreshed token: $token")
+
+            val pushConfig = prefsRepository.getCloudPushConfig()
+            if (!(pushConfig.provider == null || pushConfig.provider == CloudPushProvider.FCM.name)) {
+                Log.d(TAG, "Not trying to update registration since FCM isn't used.")
+                return@launch
+            }
+
             if (!serverManager.isRegistered()) {
                 Log.d(TAG, "Not trying to update registration since we aren't authenticated.")
                 return@launch
             }
+
             serverManager.defaultServers.forEach {
                 launch {
                     try {

@@ -1,6 +1,7 @@
 package io.homeassistant.companion.android.common.data.prefs
 
 import io.homeassistant.companion.android.common.data.integration.ControlsAuthRequiredSetting
+import io.homeassistant.companion.android.common.data.prefs.impl.entities.CloudPushConfig
 
 interface PrefsRepository {
     suspend fun getAppVersion(): String?
@@ -87,9 +88,9 @@ interface PrefsRepository {
 
     suspend fun setLocationHistoryEnabled(enabled: Boolean)
 
-    suspend fun getCloudPushProvider(): String?
+    suspend fun getCloudPushConfig(): CloudPushConfig
 
-    suspend fun setCloudPushProvider(provider: String?)
+    suspend fun setCloudPushConfig(config: CloudPushConfig)
 
     /** Clean up any app-level preferences that might reference servers */
     suspend fun removeServer(serverId: Int)

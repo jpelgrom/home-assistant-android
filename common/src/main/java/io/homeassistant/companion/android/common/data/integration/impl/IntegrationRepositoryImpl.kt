@@ -25,6 +25,7 @@ import io.homeassistant.companion.android.common.data.integration.impl.entities.
 import io.homeassistant.companion.android.common.data.integration.impl.entities.SensorUpdateRequest
 import io.homeassistant.companion.android.common.data.integration.impl.entities.Template
 import io.homeassistant.companion.android.common.data.integration.impl.entities.UpdateLocationRequest
+import io.homeassistant.companion.android.common.data.prefs.PrefsRepository
 import io.homeassistant.companion.android.common.data.servers.ServerManager
 import io.homeassistant.companion.android.common.data.websocket.impl.entities.AssistPipelineEvent
 import io.homeassistant.companion.android.common.data.websocket.impl.entities.AssistPipelineEventType
@@ -41,6 +42,7 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 class IntegrationRepositoryImpl @AssistedInject constructor(
     private val integrationService: IntegrationService,
     private val serverManager: ServerManager,
+    private val prefsRepository: PrefsRepository,
     @Assisted private val serverId: Int,
     @Named("integration") private val localStorage: LocalStorage,
     @Named("manufacturer") private val manufacturer: String,
@@ -53,10 +55,9 @@ class IntegrationRepositoryImpl @AssistedInject constructor(
         private const val APP_ID = "io.homeassistant.companion.android"
         private const val APP_NAME = "Home Assistant"
         private const val OS_NAME = "Android"
-        private const val HA_PUSH_URL = BuildConfig.PUSH_URL
+        private const val HOSTED_PUSH_URL = BuildConfig.PUSH_URL
 
         private const val PREF_APP_VERSION = "app_version" // Note: _not_ server-specific
-        private const val PREF_PUSH_URL = "push_url" // Note: _not_ server-specific
         private const val PREF_PUSH_TOKEN = "push_token" // Note: _not_ server-specific
         private const val PREF_ORPHANED_THREAD_BORDER_AGENT_IDS = "orphaned_thread_border_agent_ids" // Note: _not_ server-specific
 
@@ -166,11 +167,15 @@ class IntegrationRepositoryImpl @AssistedInject constructor(
     }
 
     override suspend fun getRegistration(): DeviceRegistration {
+        val pushConfig = prefsRepository.getCloudPushConfig()
+        // Compatibility: push data was previously stored by the IntegrationRepository
+        // If the values are null, check the integration shared preferences
+
         return DeviceRegistration(
             localStorage.getString(PREF_APP_VERSION),
             server.deviceName,
-            localStorage.getString(PREF_PUSH_URL),
-            localStorage.getString(PREF_PUSH_TOKEN)
+            pushConfig.url,
+            pushConfig.token ?: localStorage.getString(PREF_PUSH_TOKEN)
         )
     }
 
@@ -181,15 +186,14 @@ class IntegrationRepositoryImpl @AssistedInject constructor(
         if (deviceRegistration.deviceName != null) {
             serverManager.updateServer(server.copy(deviceName = deviceRegistration.deviceName))
         }
-        if (deviceRegistration.pushUrl != null) {
-            if (deviceRegistration.pushUrl != HA_PUSH_URL) {
-                localStorage.putString(PREF_PUSH_URL, deviceRegistration.pushUrl)
-            } else {
-                localStorage.putString(PREF_PUSH_URL, null)
-            }
-        }
-        if (deviceRegistration.pushToken != null) {
-            localStorage.putString(PREF_PUSH_TOKEN, deviceRegistration.pushToken)
+        if (deviceRegistration.pushUrl != null || deviceRegistration.pushToken != null) {
+            val currentConfig = prefsRepository.getCloudPushConfig()
+            prefsRepository.setCloudPushConfig(
+                currentConfig.copy(
+                    url = deviceRegistration.pushUrl.takeIf { it != HOSTED_PUSH_URL },
+                    token = deviceRegistration.pushToken
+                )
+            )
         }
     }
 
@@ -210,7 +214,7 @@ class IntegrationRepositoryImpl @AssistedInject constructor(
         }
         localStorage.remove("${serverId}_$PREF_THREAD_BORDER_AGENT_IDS")
 
-        // app version and push token is device-specific
+        // app version and push config is device-specific
     }
 
     private fun isRegistered(): Boolean {
@@ -452,7 +456,7 @@ class IntegrationRepositoryImpl @AssistedInject constructor(
         localStorage.putBoolean("${serverId}_$PREF_TRUSTED", trusted)
 
     override suspend fun getNotificationRateLimits(): RateLimitResponse {
-        val pushToken = localStorage.getString(PREF_PUSH_TOKEN) ?: ""
+        val pushToken = prefsRepository.getCloudPushConfig().token ?: localStorage.getString(PREF_PUSH_TOKEN) ?: ""
         val requestBody = RateLimitRequest(pushToken)
         var checkRateLimits: RateLimitResponse? = null
 
@@ -822,11 +826,11 @@ class IntegrationRepositoryImpl @AssistedInject constructor(
 
     private suspend fun createUpdateRegistrationRequest(deviceRegistration: DeviceRegistration): RegisterDeviceRequest {
         val oldDeviceRegistration = getRegistration()
-        val pushUrl = deviceRegistration.pushUrl?.ifBlank { HA_PUSH_URL } ?: HA_PUSH_URL
+        val pushUrl = deviceRegistration.pushUrl?.ifBlank { HOSTED_PUSH_URL } ?: oldDeviceRegistration.pushUrl ?: HOSTED_PUSH_URL
         val pushToken = deviceRegistration.pushToken ?: oldDeviceRegistration.pushToken
 
         val appData = mutableMapOf<String, Any>("push_websocket_channel" to deviceRegistration.pushWebsocket)
-        if ((pushUrl == HA_PUSH_URL && !pushToken.isNullOrBlank()) || pushToken != null) {
+        if ((pushUrl == HOSTED_PUSH_URL && !pushToken.isNullOrBlank()) || pushToken != null) {
             appData["push_url"] = pushUrl
             appData["push_token"] = pushToken
         }

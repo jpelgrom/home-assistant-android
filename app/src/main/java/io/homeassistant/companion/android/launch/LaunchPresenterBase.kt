@@ -1,6 +1,7 @@
 package io.homeassistant.companion.android.launch
 
 import io.homeassistant.companion.android.common.data.authentication.SessionState
+import io.homeassistant.companion.android.common.data.prefs.PrefsRepository
 import io.homeassistant.companion.android.common.data.servers.ServerManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -10,7 +11,8 @@ import kotlinx.coroutines.launch
 
 abstract class LaunchPresenterBase(
     private val view: LaunchView,
-    internal val serverManager: ServerManager
+    internal val serverManager: ServerManager,
+    internal val prefsRepository: PrefsRepository
 ) : LaunchPresenter {
 
     companion object {

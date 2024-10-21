@@ -1,5 +1,5 @@
 package io.homeassistant.companion.android.onboarding
 
-suspend fun getMessagingToken(): String {
+suspend fun getFirebaseMessagingToken(): String {
     return ""
 }

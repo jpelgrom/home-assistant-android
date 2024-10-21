@@ -4,8 +4,10 @@ import android.annotation.SuppressLint
 import android.app.UiModeManager
 import android.content.ActivityNotFoundException
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.NameNotFoundException
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
@@ -31,6 +33,7 @@ import io.homeassistant.companion.android.BuildConfig
 import io.homeassistant.companion.android.R
 import io.homeassistant.companion.android.authenticator.Authenticator
 import io.homeassistant.companion.android.common.R as commonR
+import io.homeassistant.companion.android.common.data.prefs.impl.entities.CloudPushProvider
 import io.homeassistant.companion.android.database.server.Server
 import io.homeassistant.companion.android.nfc.NfcSetupActivity
 import io.homeassistant.companion.android.onboarding.OnboardApp
@@ -57,7 +60,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.unifiedpush.android.connector.UnifiedPush
 
 class SettingsFragment(
     private val presenter: SettingsPresenter,
@@ -263,17 +265,37 @@ class SettingsFragment(
             }
         }
 
-        findPreference<ListPreference>("notification_cloud_provider")?.let {
+        findPreference<ListPreference>("notification_push_provider")?.let {
             lifecycleScope.launch {
                 val options = context?.let { ctx -> presenter.getNotificationProviders(ctx) } ?: emptyList()
-                it.entries = options.toTypedArray()
+                it.entries = options.map {
+                    when (it) {
+                        CloudPushProvider.NONE.name -> getString(commonR.string.none)
+                        CloudPushProvider.FCM.name -> getString(commonR.string.notification_push_fcm)
+                        else -> {
+                            val appInfo = try {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    getPackageManager()?.getApplicationInfo(it, PackageManager.ApplicationInfoFlags.of(0))
+                                } else {
+                                    @Suppress("DEPRECATION")
+                                    getPackageManager()?.getApplicationInfo(it, 0)
+                                }
+                            } catch (e: NameNotFoundException) {
+                                null
+                            }
+                            val packageName = appInfo?.let {
+                                getPackageManager()?.getApplicationLabel(it)
+                            }
+                            getString(commonR.string.notification_push_unifiedpush, packageName ?: it)
+                        }
+                    }
+                }.toTypedArray()
                 it.entryValues = options.toTypedArray()
                 it.isVisible = options.size > 1
                 it.setOnPreferenceChangeListener { _, newValue ->
-                    if (newValue is String && newValue != "fcm" && newValue != "none") {
-                        context?.let { context ->
-                            UnifiedPush.saveDistributor(context, newValue)
-                            UnifiedPush.registerApp(context)
+                    context?.let {
+                        lifecycleScope.launch {
+                            presenter.setNotificationProvider(it, newValue as? String)
                         }
                     }
                     return@setOnPreferenceChangeListener true
@@ -282,6 +304,7 @@ class SettingsFragment(
         }
 
         if (BuildConfig.FLAVOR == "full") {
+            // TODO show/hide when switching push provider
             findPreference<Preference>("notification_rate_limit")?.let {
                 lifecycleScope.launch(Dispatchers.Main) {
                     // Runs in IO Dispatcher
@@ -573,6 +596,8 @@ class SettingsFragment(
     }
 
     override fun getPackageManager(): PackageManager? = context?.packageManager
+
+    override fun getAppContext(): Context? = context?.applicationContext
 
     override fun onPause() {
         super.onPause()

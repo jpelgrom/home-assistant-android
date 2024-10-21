@@ -2,6 +2,7 @@ package io.homeassistant.companion.android.common.data.prefs
 
 import io.homeassistant.companion.android.common.data.LocalStorage
 import io.homeassistant.companion.android.common.data.integration.ControlsAuthRequiredSetting
+import io.homeassistant.companion.android.common.data.prefs.impl.entities.CloudPushConfig
 import javax.inject.Inject
 import javax.inject.Named
 import kotlinx.coroutines.runBlocking
@@ -37,6 +38,8 @@ class PrefsRepositoryImpl @Inject constructor(
         private const val PREF_AUTO_FAVORITES = "auto_favorites"
         private const val PREF_LOCATION_HISTORY_DISABLED = "location_history"
         private const val PREF_CLOUD_PUSH_PROVIDER = "cloud_push_provider"
+        private const val PREF_CLOUD_PUSH_URL = "cloud_push_url"
+        private const val PREF_CLOUD_PUSH_TOKEN = "cloud_push_token"
     }
 
     init {
@@ -244,11 +247,16 @@ class PrefsRepositoryImpl @Inject constructor(
         localStorage.putBoolean(PREF_LOCATION_HISTORY_DISABLED, !enabled)
     }
 
-    override suspend fun getCloudPushProvider(): String? =
-        localStorage.getString(PREF_CLOUD_PUSH_PROVIDER)
+    override suspend fun getCloudPushConfig(): CloudPushConfig = CloudPushConfig(
+        provider = localStorage.getString(PREF_CLOUD_PUSH_PROVIDER),
+        url = localStorage.getString(PREF_CLOUD_PUSH_URL),
+        token = localStorage.getString(PREF_CLOUD_PUSH_TOKEN)
+    )
 
-    override suspend fun setCloudPushProvider(provider: String?) {
-        localStorage.putString(PREF_CLOUD_PUSH_PROVIDER, provider)
+    override suspend fun setCloudPushConfig(config: CloudPushConfig) {
+        localStorage.putString(PREF_CLOUD_PUSH_PROVIDER, config.provider)
+        localStorage.putString(PREF_CLOUD_PUSH_URL, config.url)
+        localStorage.putString(PREF_CLOUD_PUSH_TOKEN, config.token)
     }
 
     override suspend fun removeServer(serverId: Int) {
