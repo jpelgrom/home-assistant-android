@@ -119,7 +119,8 @@ interface WebSocketRepository {
         sampleRate: Int,
         outputTts: Boolean,
         pipelineId: String? = null,
-        conversationId: String? = null
+        conversationId: String? = null,
+        wakeWord: Boolean? = false
     ): Flow<AssistPipelineEvent>?
 
     /**

@@ -2,6 +2,7 @@ package io.homeassistant.companion.android.common.assist
 
 import android.app.Application
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.homeassistant.companion.android.common.R
@@ -92,6 +93,7 @@ abstract class AssistViewModelBase(
             }
 
             flow?.collect {
+                Log.d("AssistViewModel", "Received from websocket event type: ${it.type}")
                 when (it.type) {
                     AssistPipelineEventType.RUN_START -> {
                         if (!isVoice) return@collect
@@ -129,10 +131,10 @@ abstract class AssistViewModelBase(
                             playAudio(audioPath)
                         }
                     }
-                    AssistPipelineEventType.RUN_END -> {
-                        stopRecording()
-                        job?.cancel()
-                    }
+                    // AssistPipelineEventType.RUN_END -> {
+                    //    stopRecording()
+                    //    job?.cancel()
+                    // }
                     AssistPipelineEventType.ERROR -> {
                         val errorMessage = (it.data as? AssistPipelineError)?.message ?: return@collect
                         onMessage(errorMessage, null, true)

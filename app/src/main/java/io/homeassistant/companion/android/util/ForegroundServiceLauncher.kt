@@ -6,10 +6,13 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
+import android.os.Build
 import android.util.Log
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
+import io.homeassistant.companion.android.assist.AssistWakeWordService
 import java.util.Calendar
 
 class ForegroundServiceLauncher(private val serviceClass: Class<out Service>) {
@@ -105,7 +108,11 @@ class ForegroundServiceLauncher(private val serviceClass: Class<out Service>) {
     @Synchronized
     fun onServiceCreated(service: Service, id: Int, notification: Notification) {
         // Make sure to call the startForeground method as fast as possible
-        service.startForeground(id, notification)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && service is AssistWakeWordService) {
+            service.startForeground(id, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE)
+        } else {
+            service.startForeground(id, notification)
+        }
         isStarting = false
         isRunning = true
         restartInProcess = false

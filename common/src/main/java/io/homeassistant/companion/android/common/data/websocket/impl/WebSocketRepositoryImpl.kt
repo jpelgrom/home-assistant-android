@@ -286,14 +286,23 @@ class WebSocketRepositoryImpl @AssistedInject constructor(
         sampleRate: Int,
         outputTts: Boolean,
         pipelineId: String?,
-        conversationId: String?
+        conversationId: String?,
+        wakeWord: Boolean?
     ): Flow<AssistPipelineEvent>? {
-        val data = mapOf(
-            "start_stage" to "stt",
-            "end_stage" to (if (outputTts) "tts" else "intent"),
-            "input" to mapOf(
+        val input = if (wakeWord == true) {
+            mapOf(
+                "sample_rate" to sampleRate,
+                "timeout" to 30
+            )
+        } else {
+            mapOf(
                 "sample_rate" to sampleRate
-            ),
+            )
+        }
+        val data = mapOf(
+            "start_stage" to (if (wakeWord == true) "wake_word" else "stt"),
+            "end_stage" to (if (outputTts) "tts" else "intent"),
+            "input" to input,
             "conversation_id" to conversationId
         )
         return subscribeTo(

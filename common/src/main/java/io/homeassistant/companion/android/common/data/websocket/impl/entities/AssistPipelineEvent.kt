@@ -10,7 +10,11 @@ data class AssistPipelineEvent(
 object AssistPipelineEventType {
     const val RUN_START = "run-start"
     const val RUN_END = "run-end"
+    const val WAKE_WORD_START = "wake_word-start"
+    const val WAKE_WORD_END = "wake_word-end"
     const val STT_START = "stt-start"
+    const val STT_VAD_START = "stt-vad-start"
+    const val STT_VAD_END = "stt-vad-end"
     const val STT_END = "stt-end"
     const val INTENT_START = "intent-start"
     const val INTENT_END = "intent-end"

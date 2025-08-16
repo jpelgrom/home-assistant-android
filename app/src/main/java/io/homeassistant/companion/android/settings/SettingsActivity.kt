@@ -17,6 +17,7 @@ import eightbitlab.com.blurview.BlurView
 import eightbitlab.com.blurview.RenderScriptBlur
 import io.homeassistant.companion.android.BaseActivity
 import io.homeassistant.companion.android.R
+import io.homeassistant.companion.android.assist.AssistWakeWordService
 import io.homeassistant.companion.android.authenticator.Authenticator
 import io.homeassistant.companion.android.common.data.servers.ServerManager
 import io.homeassistant.companion.android.settings.notification.NotificationHistoryFragment
@@ -105,6 +106,8 @@ class SettingsActivity : BaseActivity() {
                 )
             }
         }
+
+        AssistWakeWordService.start(this)
     }
 
     override fun onUserLeaveHint() {
