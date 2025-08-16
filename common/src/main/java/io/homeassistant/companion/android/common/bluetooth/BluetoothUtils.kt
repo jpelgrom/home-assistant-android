@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.Context
+import android.util.Log
 import androidx.core.content.getSystemService
 import java.lang.reflect.Method
 
@@ -28,7 +29,14 @@ object BluetoothUtils {
                             btDev.address,
                             name,
                             btDev.bondState == android.bluetooth.BluetoothDevice.BOND_BONDED,
-                            isConnected(btDev)
+                            isConnected(btDev),
+                            try {
+                                (btDev.javaClass.getMethod("getBatteryLevel"))
+                                    .invoke(btDev) as Int
+                            } catch (e: Exception) {
+                                Log.e("BTSensor", "Unable to get battery level for ${btDev.address} ($name)", e)
+                                -2
+                            }
                         )
                     )
                 }
@@ -41,7 +49,14 @@ object BluetoothUtils {
                             btDev.address,
                             name,
                             btDev.bondState == android.bluetooth.BluetoothDevice.BOND_BONDED,
-                            isConnected(btDev)
+                            isConnected(btDev),
+                            try {
+                                (btDev.javaClass.getMethod("getBatteryLevel"))
+                                    .invoke(btDev) as Int
+                            } catch (e: Exception) {
+                                Log.e("BTSensor", "Unable to get battery level for ${btDev.address} ($name)", e)
+                                -2
+                            }
                         )
                     )
                 }

@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import io.homeassistant.companion.android.common.R as commonR
 import io.homeassistant.companion.android.common.bluetooth.BluetoothDevice
 import io.homeassistant.companion.android.common.bluetooth.BluetoothUtils
@@ -207,6 +208,7 @@ class BluetoothSensorManager : SensorManager {
         var connectedPairedDevices: List<String> = ArrayList()
         var connectedNotPairedDevices: List<String> = ArrayList()
         var pairedDevices: List<String> = ArrayList()
+        var batteryLevelForDevices = listOf<Pair<String, Int>>()
 
         if (checkPermission(context, bluetoothConnection.id)) {
             val bluetoothDevices = BluetoothUtils.getBluetoothDevices(context)
@@ -214,6 +216,9 @@ class BluetoothSensorManager : SensorManager {
             connectedPairedDevices = bluetoothDevices.filter { b -> b.paired && b.connected }.map { checkNameAddress(it) }
             connectedNotPairedDevices = bluetoothDevices.filter { b -> !b.paired && b.connected }.map { checkNameAddress(it) }
             totalConnectedDevices = bluetoothDevices.count { b -> b.connected }
+            batteryLevelForDevices = bluetoothDevices.map { b ->
+                "${b.address} (${b.name})" to b.batteryLevel
+            }
         }
         onSensorUpdated(
             context,
@@ -223,7 +228,8 @@ class BluetoothSensorManager : SensorManager {
             mapOf(
                 "connected_paired_devices" to connectedPairedDevices,
                 "connected_not_paired_devices" to connectedNotPairedDevices,
-                "paired_devices" to pairedDevices
+                "paired_devices" to pairedDevices,
+                "battery_level" to batteryLevelForDevices
             )
         )
     }
