@@ -1,15 +1,10 @@
 
-import com.android.compose.screenshot.gradle.ScreenshotTestOptions
-import com.android.compose.screenshot.tasks.PreviewScreenshotUpdateTask
-import com.android.compose.screenshot.tasks.PreviewScreenshotValidationTask
 import io.homeassistant.companion.android.androidConfig
 import io.homeassistant.companion.android.getPluginId
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
-import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
-import org.gradle.kotlin.dsl.withType
 
 /**
  * A convention plugin that applies common configurations to Android Compose modules.
@@ -21,16 +16,11 @@ class AndroidComposeConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             apply(plugin = libs.plugins.compose.compiler.getPluginId())
-            apply(plugin = libs.plugins.screenshot.getPluginId())
 
             androidConfig {
                 buildFeatures.compose = true
 
                 experimentalProperties["android.experimental.enableScreenshotTest"] = true
-            }
-
-            extensions.configure<ScreenshotTestOptions> {
-                imageDifferenceThreshold = 0.00025f // 0.025%
             }
 
             // Screenshot test worker memory grows with test count. Increase as needed.
@@ -42,15 +32,15 @@ class AndroidComposeConventionPlugin : Plugin<Project> {
             // N test classes caps that growth; without it the app module reaches ~15GB on CI.
             val screenshotTestForkEvery = 10L
 
-            tasks.withType<PreviewScreenshotValidationTask>().configureEach {
-                maxHeapSize = maxHeapSizeScreenshotTesting
-                forkEvery = screenshotTestForkEvery
-            }
-
-            tasks.withType<PreviewScreenshotUpdateTask>().configureEach {
-                maxHeapSize = maxHeapSizeScreenshotTesting
-                forkEvery = screenshotTestForkEvery
-            }
+//            tasks.withType<PreviewScreenshotValidationTask>().configureEach {
+//                maxHeapSize = maxHeapSizeScreenshotTesting
+//                forkEvery = screenshotTestForkEvery
+//            }
+//
+//            tasks.withType<PreviewScreenshotUpdateTask>().configureEach {
+//                maxHeapSize = maxHeapSizeScreenshotTesting
+//                forkEvery = screenshotTestForkEvery
+//            }
 
             androidConfig {
                 dependencies {
@@ -66,9 +56,19 @@ class AndroidComposeConventionPlugin : Plugin<Project> {
 
                     "testImplementation"(platform(libs.compose.bom))
                     "testImplementation"(libs.bundles.androidx.compose.ui.test)
+                }
 
-                    "screenshotTestImplementation"(libs.compose.uiTooling)
-                    "screenshotTestImplementation"(libs.screenshot.validation.api)
+                with(testOptions) {
+                    screenshotTests.create("screenshotTest") {
+                        engineVersion = libs.versions.screenshot.get()
+                        imageDifferenceThreshold = 0.00025f // 0.025%
+                        //targetVariants.add("fullDebug")
+
+                        dependencies {
+                            implementation.add(libs.compose.uiTooling)
+                            implementation.add(libs.screenshot.validation.api)
+                        }
+                    }
                 }
             }
         }
