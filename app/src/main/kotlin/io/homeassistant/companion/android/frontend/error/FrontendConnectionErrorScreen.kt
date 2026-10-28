@@ -2,9 +2,13 @@ package io.homeassistant.companion.android.frontend.error
 
 import android.net.Uri
 import androidx.annotation.VisibleForTesting
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -20,12 +24,18 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -34,6 +44,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
@@ -53,11 +64,15 @@ import io.homeassistant.companion.android.common.compose.composable.HATopBarPlac
 import io.homeassistant.companion.android.common.compose.theme.HADimens
 import io.homeassistant.companion.android.common.compose.theme.HATextStyle
 import io.homeassistant.companion.android.common.compose.theme.HAThemeForPreview
+import io.homeassistant.companion.android.common.compose.theme.LocalHAColorScheme
 import io.homeassistant.companion.android.common.compose.theme.MaxButtonWidth
 import io.homeassistant.companion.android.common.data.connectivity.ConnectivityCheckState
 import io.homeassistant.companion.android.onboarding.connection.ConnectivityChecksSection
+import io.homeassistant.companion.android.settings.server.ServerChooserItem
+import io.homeassistant.companion.android.settings.server.ServerUserAvatar
 import io.homeassistant.companion.android.util.compose.HAPreviews
 import io.homeassistant.companion.android.util.compose.webview.BLANK_URL
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private val MaxContentWidth = MaxButtonWidth
@@ -75,7 +90,8 @@ fun FrontendConnectionErrorScreen(
     stateProvider: FrontendConnectionErrorStateProvider,
     onOpenExternalLink: suspend (Uri) -> Unit,
     modifier: Modifier = Modifier,
-    topContent: @Composable () -> Unit = {},
+    serverItems: List<ServerChooserItem> = emptyList(),
+    onSwitchServer: () -> Unit = {},
     actions: @Composable () -> Unit = {},
 ) {
     val url by stateProvider.urlFlow.collectAsState()
@@ -89,7 +105,8 @@ fun FrontendConnectionErrorScreen(
         modifier = modifier,
         connectivityCheckState = connectivityCheckState,
         onRetryConnectivityCheck = stateProvider::runConnectivityChecks,
-        topContent = topContent,
+        serverItems = serverItems,
+        onSwitchServer = onSwitchServer,
         actions = actions,
     )
 }
@@ -106,7 +123,6 @@ fun FrontendConnectionErrorScreen(
  * @param modifier Modifier for the screen
  * @param errorDetailsExpanded Whether the error details section should be expanded by default
  * @param onRetryConnectivityCheck Callback when retry connectivity check is requested
- * @param topContent Optional content shown where a top bar would be, such as the server pill
  * @param actions Composable slot for action buttons at the bottom of the screen
  */
 @Composable
@@ -115,10 +131,11 @@ fun FrontendConnectionErrorScreen(
     error: FrontendConnectionError?,
     onOpenExternalLink: suspend (Uri) -> Unit,
     connectivityCheckState: ConnectivityCheckState,
+    serverItems: List<ServerChooserItem>,
+    onSwitchServer: () -> Unit,
     modifier: Modifier = Modifier,
     errorDetailsExpanded: Boolean = false,
     onRetryConnectivityCheck: () -> Unit = {},
-    topContent: @Composable () -> Unit = {},
     actions: @Composable () -> Unit = {},
 ) {
     error?.let { connectionError ->
@@ -134,8 +151,9 @@ fun FrontendConnectionErrorScreen(
                 ?: stringResource(commonR.string.no_description),
             errorType = connectionError.rawErrorType,
             errorDetailsExpanded = errorDetailsExpanded,
+            serverItems = serverItems,
+            onSwitchServer = onSwitchServer,
             modifier = modifier,
-            topContent = topContent,
             actions = actions,
         )
     }
@@ -155,9 +173,9 @@ fun FrontendConnectionErrorScreen(
  * @param errorType The raw error type for debugging
  * @param errorDetailsExpanded Whether the error details section should be expanded by default
  * @param modifier Modifier for the screen
- * @param topContent Optional content shown where a top bar would be, such as the server pill
  * @param actions Composable slot for action buttons at the bottom of the screen
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FrontendConnectionErrorScreen(
     onOpenExternalLink: suspend (Uri) -> Unit,
@@ -171,32 +189,70 @@ fun FrontendConnectionErrorScreen(
     errorType: String,
     errorDetailsExpanded: Boolean,
     modifier: Modifier = Modifier,
-    topContent: @Composable () -> Unit = {},
+    serverItems: List<ServerChooserItem> = emptyList(),
+    onSwitchServer: () -> Unit = {},
     actions: @Composable () -> Unit = {},
 ) {
     Scaffold(
         modifier = modifier,
         contentWindowInsets = WindowInsets.safeDrawing,
-    ) { contentPadding ->
-        Box(modifier = Modifier.padding(contentPadding)) {
-            FrontendErrorContent(
-                onOpenExternalLink = onOpenExternalLink,
-                title = title,
-                subtitle = subtitle,
-                errorDescription = errorDescription,
-                errorType = errorType,
-                url = url,
-                icon = icon,
-                errorDetailsExpanded = errorDetailsExpanded,
-                connectivityCheckState = connectivityCheckState,
-                onRetryConnectivityCheck = onRetryConnectivityCheck,
-                actions = actions,
+        topBar = {
+            TopAppBar(
+                title = {},
+                actions = {
+                    if (serverItems.size > 1) {
+                        serverItems.firstOrNull { it.isActive }?.let { server ->
+                            var showName by remember(server.serverName) { mutableStateOf(true) }
+
+                            LaunchedEffect(server.serverName) {
+                                delay(2000)
+                                showName = false
+                            }
+
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                AnimatedVisibility(
+                                    visible = showName,
+                                    enter = EnterTransition.None,
+                                    exit = fadeOut() + shrinkHorizontally(shrinkTowards = Alignment.End),
+                                ) {
+                                    Text(
+                                        text = server.serverName,
+                                        style = HATextStyle.BodyMedium.copy(
+                                            color = LocalHAColorScheme.current.colorOnPrimaryNormal,
+                                        ),
+                                        fontWeight = FontWeight.SemiBold,
+                                        maxLines = 1,
+                                        modifier = Modifier.padding(end = 8.dp),
+                                    )
+                                }
+
+                                ServerUserAvatar(
+                                    item = server,
+                                    modifier = Modifier.clickable(onClick = { onSwitchServer() }),
+                                    showActive = false,
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(4.dp))
+                },
             )
-            // Drawn over the top bar sized space so the image stays aligned with the other screens
-            Box(modifier = Modifier.align(Alignment.TopCenter).padding(top = HADimens.SPACE4)) {
-                topContent()
-            }
-        }
+        },
+    ) { contentPadding ->
+        FrontendErrorContent(
+            onOpenExternalLink = onOpenExternalLink,
+            title = title,
+            subtitle = subtitle,
+            errorDescription = errorDescription,
+            errorType = errorType,
+            url = url,
+            icon = icon,
+            errorDetailsExpanded = errorDetailsExpanded,
+            connectivityCheckState = connectivityCheckState,
+            onRetryConnectivityCheck = onRetryConnectivityCheck,
+            actions = actions,
+            modifier = Modifier.padding(contentPadding),
+        )
     }
 }
 
@@ -459,6 +515,8 @@ private fun FrontendErrorScreenPreview() {
             url = "http://homeassistant.local",
             icon = ImageVector.vectorResource(R.drawable.ic_casita_no_connection),
             errorDetailsExpanded = true,
+            serverItems = emptyList(),
+            onSwitchServer = {},
         )
     }
 }

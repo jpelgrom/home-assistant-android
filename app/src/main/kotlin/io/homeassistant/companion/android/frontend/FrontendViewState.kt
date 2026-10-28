@@ -8,6 +8,7 @@ import io.homeassistant.companion.android.frontend.error.FrontendConnectionError
 import io.homeassistant.companion.android.frontend.exoplayer.ExoPlayerUiState
 import io.homeassistant.companion.android.frontend.improv.ImprovUIState
 import io.homeassistant.companion.android.frontend.navigation.FrontendTarget
+import io.homeassistant.companion.android.settings.server.ServerChooserItem
 import io.homeassistant.companion.android.util.compose.webview.BLANK_URL
 
 /**
@@ -89,6 +90,7 @@ sealed interface FrontendViewState {
         override val serverId: Int,
         override val url: String,
         val error: FrontendConnectionError,
+        val serverItems: List<ServerChooserItem>,
         val actions: List<ErrorAction> = emptyList(),
     ) : FrontendViewState
 

@@ -79,9 +79,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.zxing.BarcodeFormat
-import io.github.timoptr.mdiicons.Mdi
-import io.github.timoptr.mdiicons.generated.UnfoldMoreHorizontal
-import io.github.timoptr.mdiicons.rememberImageVector
 import io.homeassistant.companion.android.common.R as commonR
 import io.homeassistant.companion.android.common.compose.theme.HADimens
 import io.homeassistant.companion.android.common.compose.theme.HATextStyle
@@ -114,6 +111,7 @@ import io.homeassistant.companion.android.loading.LoadingScreen
 import io.homeassistant.companion.android.onboarding.locationforsecureconnection.LocationForSecureConnectionScreen
 import io.homeassistant.companion.android.onboarding.locationforsecureconnection.LocationForSecureConnectionViewModel
 import io.homeassistant.companion.android.onboarding.locationforsecureconnection.LocationForSecureConnectionViewModelFactory
+import io.homeassistant.companion.android.settings.server.ServerChooserItem
 import io.homeassistant.companion.android.util.OnSwipeListener
 import io.homeassistant.companion.android.util.compose.HAPreviews
 import io.homeassistant.companion.android.util.compose.media.player.HAMediaPlayer
@@ -515,10 +513,10 @@ private fun StateOverlay(
 
         is FrontendViewState.Error -> ErrorOverlay(
             errorStateProvider = errorStateProvider,
+            serverItems = viewState.serverItems,
             actions = viewState.actions,
             onErrorAction = onErrorAction,
             onOpenExternalLink = onOpenExternalLink,
-            connectingServerName = connectingServerName,
             onSwitchServer = onSwitchServer,
         )
     }
@@ -534,11 +532,6 @@ private fun StateOverlay(
             modifier = Modifier.background(LocalHAColorScheme.current.colorSurfaceDefault),
             showBrand = true,
         ) {
-            ServerPill(
-                serverName = connectingServerName,
-                onClick = onSwitchServer,
-                textColor = LocalHAColorScheme.current.colorTextSecondary,
-            )
         }
     }
 }
@@ -607,21 +600,15 @@ private fun ErrorOverlay(
     actions: List<ErrorAction>,
     onErrorAction: (ErrorActionIntent) -> Unit,
     onOpenExternalLink: suspend (Uri) -> Unit,
-    connectingServerName: String?,
+    serverItems: List<ServerChooserItem>,
     onSwitchServer: () -> Unit,
 ) {
     FrontendConnectionErrorScreen(
         stateProvider = errorStateProvider,
         onOpenExternalLink = onOpenExternalLink,
         modifier = Modifier.fillMaxSize(),
-        topContent = {
-            ServerPill(
-                serverName = connectingServerName,
-                onClick = onSwitchServer,
-                textColor = LocalHAColorScheme.current.colorOnPrimaryNormal,
-                trailingIcon = Mdi.UnfoldMoreHorizontal.rememberImageVector(),
-            )
-        },
+        serverItems = serverItems,
+        onSwitchServer = onSwitchServer,
         actions = {
             ErrorActions(
                 actions = actions,
@@ -1050,6 +1037,7 @@ private fun FrontendScreenErrorPreview() {
             viewState = FrontendViewState.Error(
                 serverId = 1,
                 url = "https://example.com",
+                serverItems = emptyList(),
                 error = FrontendConnectionError.Unreachable(
                     message = commonR.string.webview_error_HOST_LOOKUP,
                     errorDetails = "Connection timed out",

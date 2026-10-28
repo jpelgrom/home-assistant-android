@@ -52,6 +52,7 @@ import io.homeassistant.companion.android.frontend.navigation.FrontendTarget
 import io.homeassistant.companion.android.frontend.permissions.PermissionManager
 import io.homeassistant.companion.android.frontend.url.FrontendUrlManager
 import io.homeassistant.companion.android.frontend.url.UrlLoadResult
+import io.homeassistant.companion.android.settings.server.ServerChooserItemsUseCase
 import io.homeassistant.companion.android.util.HAWebChromeClient
 import io.homeassistant.companion.android.util.HAWebViewClient
 import io.homeassistant.companion.android.util.HAWebViewClientFactory
@@ -134,6 +135,7 @@ internal class FrontendViewModel @VisibleForTesting constructor(
     private val barcodeScannerHandler: FrontendBarcodeScannerHandler,
     private val matterThreadHandler: FrontendMatterThreadHandler,
     private val keyChainRepository: KeyChainRepository,
+    private val serverChooserItemsUseCase: ServerChooserItemsUseCase,
 ) : ViewModel(),
     FrontendConnectionErrorStateProvider {
 
@@ -159,6 +161,7 @@ internal class FrontendViewModel @VisibleForTesting constructor(
         barcodeScannerHandler: FrontendBarcodeScannerHandler,
         matterThreadHandler: FrontendMatterThreadHandler,
         keyChainRepository: KeyChainRepository,
+        serverChooserItemsUseCase: ServerChooserItemsUseCase,
     ) : this(
         initialServerId = savedStateHandle.toRoute<FrontendRoute>().serverId,
         initialTarget = savedStateHandle.toRoute<FrontendRoute>().target,
@@ -181,6 +184,7 @@ internal class FrontendViewModel @VisibleForTesting constructor(
         barcodeScannerHandler = barcodeScannerHandler,
         matterThreadHandler = matterThreadHandler,
         keyChainRepository = keyChainRepository,
+        serverChooserItemsUseCase = serverChooserItemsUseCase,
     )
 
     /**
@@ -1167,13 +1171,16 @@ internal class FrontendViewModel @VisibleForTesting constructor(
             val serverId = _viewState.value.serverId
             val isInternal = resolveIsInternalConnection(serverId)
             val actions = errorActions(error, isInternalConnection = isInternal)
-            _viewState.update { currentState ->
-                FrontendViewState.Error(
-                    serverId = currentState.serverId,
-                    url = currentState.url,
-                    error = error,
-                    actions = actions,
-                )
+            serverChooserItemsUseCase(serverManager.servers()).collect { serverItems ->
+                _viewState.update { currentState ->
+                    FrontendViewState.Error(
+                        serverId = currentState.serverId,
+                        url = currentState.url,
+                        error = error,
+                        serverItems = serverItems,
+                        actions = actions,
+                    )
+                }
             }
         }
         // Automatically run connectivity checks when an error occurs

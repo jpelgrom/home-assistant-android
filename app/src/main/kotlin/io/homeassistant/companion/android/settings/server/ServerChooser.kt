@@ -147,7 +147,7 @@ private fun ServerChooserRow(item: ServerChooserItem, onServerSelected: (Int) ->
 }
 
 @Composable
-private fun ServerUserAvatar(item: ServerChooserItem, modifier: Modifier = Modifier) {
+fun ServerUserAvatar(item: ServerChooserItem, modifier: Modifier = Modifier, showActive: Boolean = true) {
     Box(modifier = modifier.size(AVATAR_SIZE)) {
         val avatarModifier = Modifier
             .fillMaxSize()
@@ -173,7 +173,7 @@ private fun ServerUserAvatar(item: ServerChooserItem, modifier: Modifier = Modif
             }
         }
 
-        if (item.isActive) {
+        if (item.isActive && showActive) {
             ActiveBadge(modifier = Modifier.align(Alignment.BottomEnd))
         }
     }
